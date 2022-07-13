@@ -1,0 +1,6 @@
+*.db
+.DS_Store
+venv
+.idea
+passenger_wsgi.py
+__pycache__
