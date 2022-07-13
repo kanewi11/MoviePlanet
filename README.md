@@ -4,7 +4,7 @@
 
 ![LOGO](https://kingzmsk.ru//static/img/logo.png "MoviePlanet")
 
-##Telegram bot for watching movies.
+## Telegram bot for watching movies.
 
 It works through the api of a third-party site. 
 
