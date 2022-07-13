@@ -14,7 +14,7 @@ from .search_film import make_post, find_film
 from .keyboards import *
 
 
-API_TOKEN = '5435716096:AAET58duGGeNGCm_trjw0vSSzWnewO3khVc'
+API_TOKEN = 'MY TOKEN'
 
 logging.basicConfig(level=logging.INFO)
 
