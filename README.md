@@ -24,6 +24,6 @@ Solved the problem banal, bought a domain and hosting, and simply redirected fro
 
 2. In the configuration file, change the link to your group and to the site.
 
-3. The home page of the site must take the parameter ```"q" example (https://site.com/?q=https://...)``` in which the link to the movie or TV series will be passed, then the site must redirect the user to the link in the request using JS. This repository already has a redirection site written in Flask, you can check it out.
+3. The home page of the site must take the parameter "q" example ```https://yoursite.com/?q=https://film.com/Avengers: Endgame``` in which the link to the movie or TV series will be passed, then the site must redirect the user to the link in the request using JS. This repository already has a redirection site written in Flask, you can check it out.
 
 4. After that you should run ```start.py``` in the ```/MoviePlanet``` directory
