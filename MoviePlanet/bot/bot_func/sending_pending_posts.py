@@ -3,8 +3,8 @@ import asyncio
 import logging
 import datetime
 import traceback
-from MoviePlanet.bot import session, bot, MY_CHANNEL_URL
-from MoviePlanet.bot.models import Post
+from .. import session, bot, MY_CHANNEL_URL
+from ..models import Post
 
 
 async def send_post():

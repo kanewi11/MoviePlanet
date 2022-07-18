@@ -2,6 +2,14 @@
 
 ![LOGO](https://kingzmsk.ru/static/img/logo.png "MoviePlanet")
 
+## The bot knows how:
+1. Search for movies and TV series.
+2. Make posts automatically, the input link to the movie or series.
+3. Send posts by time to the channel (for admins).
+4. Change the time of sending (for admins).
+5. Delete unsent posts (for admins).
+6. Send promotional posts to all bot users and to the channel (for admins).
+
 ## Telegram bot for watching movies.
 
 It works through the api of a third-party site. 

@@ -4,13 +4,13 @@ import traceback
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
 from aiogram import types
-from MoviePlanet.bot.states import ForwardState, PostState
-from MoviePlanet.bot.models import User, Admin, Post
-from MoviePlanet.bot.search_film import find_film
-from MoviePlanet.bot import session, cb, dp, bot
-from MoviePlanet.bot.keyboards import *
-from MoviePlanet.bot.msg_text import *
-from MoviePlanet.bot.config import *
+from ..states import ForwardState, PostState
+from ..models import User, Admin, Post
+from ..search_film import find_film
+from .. import session, cb, dp, bot
+from ..keyboards import *
+from ..msg_text import *
+from ..config import *
 
 
 @dp.message_handler(commands=['start'])

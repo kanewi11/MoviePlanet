@@ -2,10 +2,10 @@ import logging
 import traceback
 from aiogram.dispatcher import FSMContext
 from aiogram import types
-from MoviePlanet.bot.states import EditPostState
-from MoviePlanet.bot.models import Post
-from MoviePlanet.bot.keyboards import *
-from MoviePlanet.bot import session, cb, dp
+from ..states import EditPostState
+from ..models import Post
+from ..keyboards import *
+from .. import session, cb, dp
 
 
 @dp.callback_query_handler(cb.filter(action=["delete"]))

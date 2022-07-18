@@ -5,11 +5,11 @@ import traceback
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext
 from aiogram import types
-from MoviePlanet.bot.states import ForwardState, PostState, EditPostState
-from MoviePlanet.bot.models import User, Admin, Post
-from MoviePlanet.bot.search_film import make_post
-from MoviePlanet.bot.keyboards import *
-from MoviePlanet.bot import session, dp, bot, MY_CHANNEL_URL
+from ..states import ForwardState, PostState, EditPostState
+from ..models import User, Admin, Post
+from ..search_film import make_post
+from ..keyboards import *
+from .. import session, dp, bot, MY_CHANNEL_URL
 
 
 @dp.message_handler(state=ForwardState.cancel_or_message,
