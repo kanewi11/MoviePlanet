@@ -1,8 +1,8 @@
 # MoviePlanet
 
-## Bot [link](https://t.me/watch_films_and_serials_bot)
+## Bot ➡️ [link](https://t.me/watch_films_and_serials_bot)
 
-![LOGO](https://kingzmsk.ru//static/img/logo.png "MoviePlanet")
+![LOGO](https://kingzmsk.ru/static/img/logo.png "MoviePlanet")
 
 ## Telegram bot for watching movies.
 
