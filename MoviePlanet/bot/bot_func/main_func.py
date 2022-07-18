@@ -10,6 +10,7 @@ from MoviePlanet.bot.search_film import find_film
 from MoviePlanet.bot import session, cb, dp, bot
 from MoviePlanet.bot.keyboards import *
 from MoviePlanet.bot.msg_text import *
+from MoviePlanet.bot.config import *
 
 
 @dp.message_handler(commands=['start'])
@@ -169,7 +170,7 @@ async def main(message: types.Message):
     for film in films:
         keyboard = types.InlineKeyboardMarkup()
         keyboard.add(types.InlineKeyboardButton(text="📺 Смотреть",
-                                                url='http://kingzmsk.ru/?q=' +
+                                                url=f'{SITE_URL}/?q=' +
                                                     film['player']['iframe_url']
                                                     + '?d=movielab.top'))
         serial = str()
