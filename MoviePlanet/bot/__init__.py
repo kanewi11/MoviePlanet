@@ -9,12 +9,11 @@ from sqlalchemy import create_engine
 from aiogram.utils import executor
 from aiogram import Bot, types
 from .states import ForwardState, PostState, EditPostState
-from .model import User, Admin, Post
 from .search_film import make_post, find_film
+from .models import User, Admin, Post
 from .keyboards import *
+from .config import *
 
-
-API_TOKEN = 'MY TOKEN'
 
 logging.basicConfig(level=logging.INFO)
 
@@ -27,10 +26,6 @@ cb = CallbackData("post", "id", "action")
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
-
-# сюда добавить группы '@GroupName'
-CHANNEL_URL = '@movies_from_planet'
-groups = ['@movies_from_planet']
 
 
 from .bot_func.main_func import *

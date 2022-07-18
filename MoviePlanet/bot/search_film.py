@@ -57,8 +57,8 @@ async def find_film(film_name: str) -> list or None:
         check_domain(response.url)
         results = response.json()['results']
         return results
-    except Exception as error:
-        print(error)
+    except Exception:
+        logging.warning(traceback.format_exc())
         return None
 
 
@@ -103,6 +103,6 @@ async def make_post(url: str) -> dict or None:
             'rating': rating,
             'serial': serial
         }
-    except Exception as error:
+    except Exception:
         logging.warning(traceback.format_exc())
         return None

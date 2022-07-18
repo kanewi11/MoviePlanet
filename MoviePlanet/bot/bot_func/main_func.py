@@ -5,21 +5,25 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
 from aiogram import types
 from MoviePlanet.bot.states import ForwardState, PostState
-from MoviePlanet.bot.model import User, Admin, Post
+from MoviePlanet.bot.models import User, Admin, Post
 from MoviePlanet.bot.search_film import find_film
+from MoviePlanet.bot import session, cb, dp, bot
 from MoviePlanet.bot.keyboards import *
-from MoviePlanet.bot import session, cb, dp, bot, groups
+from MoviePlanet.bot.msg_text import *
 
 
 @dp.message_handler(commands=['start'])
 async def command_start(message: types.Message):
+    """
+    Все предельно понятно, функция обработки команды start.
+    Тут высылается приветственное сообщение и кнопки для админов.
+
+    :param message:
+    :return:
+    """
+
     if message.chat.type == "private":
-        text_msg = "<b>Привет!</b>\n\nОтправь мне название фильма или сериала. 💬\n" \
-                   "Пожалуйста, <b>без ошибок!</b> 😉\n\n" \
-                   "<b>Например:</b>\n<i>Зеленая миля</i>\n\n" \
-                   "<b>Наблюдаются небольшие проблемы с поиском, не все сериалы и фильмы возможно найти, а также " \
-                   "проблемы с просмотром сериалов.\n\nПриносим свои извинения, команда разработчиков уже в " \
-                   "курсе и чинит все!</b>"
+        text_msg = msg_start
     else:
         text_msg = "Этот бот не предназначен для использования в общих чатах."
 
@@ -37,29 +41,33 @@ async def command_start(message: types.Message):
     if not admin:
         await bot.send_message(message.chat.id, text=text_msg)
         return
+
     await bot.send_message(message.chat.id, text=text_msg, reply_markup=kb_start)
 
 
 @dp.message_handler(commands=['help'])
 async def command_help(message: types.Message):
-    text_msg = """
-<b>Как пользоваться?</b>
+    """
+    Функция обработки команды help и отправки сообщения помощи.
 
-<i>Просто отправь мне название фильма или сериала</i>  💭📤
+    :param message:
+    :return:
+    """
 
-Например:
-<b>Зеленая миля</b>
-
-<b>Бот не находит фильмы?</b>
-
-<i>Просто подождите, идет техническое обслуживание. Оно занимает примерно <b>30 минут</b>.</i> 
-        """
+    text_msg = text_help
 
     await bot.send_message(message.chat.id, text=text_msg)
 
 
 @dp.message_handler(text="Сделать пост фильма 🤳")
 async def post(message: types.Message):
+    """
+    Функция перенаправления на машину состояния для создания поста в группе.
+
+    :param message:
+    :return:
+    """
+
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
 
     if not admin:
@@ -71,6 +79,13 @@ async def post(message: types.Message):
 
 @dp.message_handler(text="Отложенные посты 🕜")
 async def deferred_post(message: types.Message):
+    """
+    Функция просмотра отложенных постов.
+
+    :param message:
+    :return:
+    """
+
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
 
     if not admin:
@@ -80,6 +95,7 @@ async def deferred_post(message: types.Message):
     if not posts:
         await message.answer('Нет отложенных постов 🫙')
         return
+
     for p in posts:
         kb_edit_delete = InlineKeyboardMarkup(row_width=2)
         kb_edit_delete.add(
@@ -100,6 +116,13 @@ async def deferred_post(message: types.Message):
 
 @dp.message_handler(text="Рекламный пост 💰")
 async def wait_forward(message: types.Message, state: FSMContext):
+    """
+    Функция для отправки рекламного поста (не полностью дописана из-за ненадобности)
+
+    :param message:
+    :param state:
+    :return:
+    """
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
 
     if not admin:
@@ -111,6 +134,15 @@ async def wait_forward(message: types.Message, state: FSMContext):
 
 @dp.message_handler()
 async def main(message: types.Message):
+    """
+    Обработка запроса на поиск фильма или сериала.
+
+    В плане переписать функцию и сделать вывод постранично, а так же обдумать кэширование.
+
+    :param message:
+    :return:
+    """
+
     if message.chat.type != "private":
         text_msg = "Этот бот не предназначен для использования в общих чатах."
         return await bot.send_message(message.chat.id, text=text_msg)
@@ -119,16 +151,12 @@ async def main(message: types.Message):
         text_msg = "Хммм...\nТакой команды не припомню 🤔"
         return await bot.send_message(message.chat.id, text=text_msg)
 
-    for group in groups:
+    for group in CHANNELS_TO_SUBSCRIBE:
         user_channel_status = await bot.get_chat_member(chat_id=group, user_id=message.from_user.id)
         if user_channel_status["status"] != 'left':
             pass
         else:
-            groups_txt = "\n".join(groups)
-            await bot.send_message(message.from_user.id, f'СТОЙ!\n\n'
-                                                         f'Подпишись чтобы не пропустить:\n{groups_txt}\n\n'
-                                                         f'Тогда тебе откроется доступ, это сделано для того,\n'
-                                                         f'чтобы мы могли функционировать, спасибо за понимание!')
+            await bot.send_message(message.from_user.id, msg_if_not_subscribed)
             return
 
     await bot.send_message(message.chat.id, text='🔎 Ищу...\nПоиск может занять до 15 секунд.')
@@ -144,7 +172,7 @@ async def main(message: types.Message):
                                                 url='http://kingzmsk.ru/?q=' +
                                                     film['player']['iframe_url']
                                                     + '?d=movielab.top'))
-        serial = ''
+        serial = str()
         if film['type'] == 'serial':
             serial = '\n<b>(Сериал)</b>'
         caption = f'<b>📽 {film["title_ru"]}</b>{serial}\n\n' \

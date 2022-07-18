@@ -6,16 +6,23 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext
 from aiogram import types
 from MoviePlanet.bot.states import ForwardState, PostState, EditPostState
-from MoviePlanet.bot.model import User, Admin, Post
+from MoviePlanet.bot.models import User, Admin, Post
 from MoviePlanet.bot.search_film import make_post
 from MoviePlanet.bot.keyboards import *
-from MoviePlanet.bot import session, dp, bot, CHANNEL_URL
+from MoviePlanet.bot import session, dp, bot, MY_CHANNEL_URL
 
 
 @dp.message_handler(state=ForwardState.cancel_or_message,
                     content_types=['video', 'photo', 'document', 'text'],
                     chat_type=types.ChatType.PRIVATE)
-async def check_forward(message: types.Message, state: FSMContext):
+async def forward_msg(message: types.Message, state: FSMContext):
+    """
+    Функция пересылки поста всем пользователям бота и в группу.
+
+    :param message:
+    :param state:
+    :return:
+    """
     if message.text == 'Отмена':
         await message.answer('Операция отменена', reply_markup=kb_start)
         await state.finish()
@@ -74,6 +81,13 @@ async def check_forward(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=EditPostState.DATE_TIME, content_types=types.ContentTypes.TEXT)
 async def edit_post_date_time(message: types.Message, state: FSMContext):
+    """
+    Функция изменения времени отложенного поста.
+
+    :param message:
+    :param state:
+    :return:
+    """
     response = message.text
     if response == 'Отмена':
         await message.answer('Операция отменена ❌', reply_markup=kb_start)
@@ -107,6 +121,14 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=PostState.DATA)
 async def get_post(message: types.Message, state: FSMContext):
+    """
+    Функция парсинга поста и отправки его админу.
+
+    :param message:
+    :param state:
+    :return:
+    """
+
     response = message.text
     if response == 'Отмена':
         await message.answer('Операция отменена ❌', reply_markup=kb_start)
@@ -139,6 +161,14 @@ async def get_post(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=PostState.DATE_TIME)
 async def now_or_later(message: types.Message, state: FSMContext):
+    """
+    Функция отправки поста сейчас или отложить.
+
+    :param message:
+    :param state:
+    :return:
+    """
+
     response = message.text
     if response == 'Выслать сейчас 🚀':
         await message.answer('💬 Высылаю...', reply_markup=kb_start)
@@ -150,7 +180,7 @@ async def now_or_later(message: types.Message, state: FSMContext):
                       f'⭐️ {data["rating"]}\n\n' \
                       f'<i>{data["description"]}</i>\n\n' \
                       f'<b>Бот в закрепе ☝️ </b>'
-            chat_id = await bot.get_chat(CHANNEL_URL)
+            chat_id = await bot.get_chat(MY_CHANNEL_URL)
             await bot.send_photo(chat_id=chat_id.id,
                                  photo=f'https://{data["poster"]}',
                                  caption=caption)
