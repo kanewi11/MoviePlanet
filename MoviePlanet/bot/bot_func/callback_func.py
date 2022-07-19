@@ -1,11 +1,10 @@
-import logging
 import traceback
 from aiogram.dispatcher import FSMContext
 from aiogram import types
 from ..states import EditPostState
 from ..models import Post
 from ..keyboards import *
-from .. import session, cb, dp
+from .. import session, cb, dp, logging
 
 
 @dp.callback_query_handler(cb.filter(action=["delete"]))

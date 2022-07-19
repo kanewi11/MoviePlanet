@@ -15,7 +15,7 @@ from .keyboards import *
 from .config import *
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(filename="logs.log", level=logging.INFO)
 
 engine = create_engine('sqlite:///base.db', echo=False)
 Session = sessionmaker(bind=engine)
@@ -28,10 +28,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 dp.middleware.setup(LoggingMiddleware())
 
 
-from .bot_func.main_func import *
-from .bot_func.state_func import *
-from .bot_func.callback_func import *
-from .bot_func.sending_pending_posts import send_post
+from .bot_func import *
 
 
 async def on_bot_start_up(dispatcher: Dispatcher):

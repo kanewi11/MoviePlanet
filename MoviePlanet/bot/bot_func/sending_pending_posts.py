@@ -15,11 +15,13 @@ async def send_post():
     """
 
     while True:
-        posts = session.query(Post).filter(Post.published == False).all()
-        for post in posts:
-            if post.date_time >= datetime.datetime.now():
-                continue
+        posts = session.query(Post).filter(Post.published <= datetime.datetime.now()).all()
+        
+        if not posts:
+            await asyncio.sleep(20)
+            continue
 
+        for post in posts:
             json_data = json.loads(post.post)
             caption = f'🎬 <b>{json_data["title"]}</b>\n\n' \
                       f'🌎 <b>Год и страна:</b> {json_data["year_country"]}\n' \
@@ -39,5 +41,3 @@ async def send_post():
         except:
             logging.warning(traceback.format_exc())
             session.rollback()
-
-        await asyncio.sleep(20)

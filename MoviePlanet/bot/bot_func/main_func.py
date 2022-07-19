@@ -1,5 +1,4 @@
 import json
-import logging
 import traceback
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
@@ -7,7 +6,7 @@ from aiogram import types
 from ..states import ForwardState, PostState
 from ..models import User, Admin, Post
 from ..search_film import find_film
-from .. import session, cb, dp, bot
+from .. import session, cb, dp, bot, logging
 from ..keyboards import *
 from ..msg_text import *
 from ..config import *
