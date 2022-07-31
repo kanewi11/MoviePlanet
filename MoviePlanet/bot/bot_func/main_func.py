@@ -38,11 +38,17 @@ async def command_start(message: types.Message):
         session.rollback()
 
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
+
     if not admin:
-        await bot.send_message(message.chat.id, text=text_msg)
+        await bot.send_message(message.chat.id, text=text_msg.format(message.from_user.first_name))
+        for group in CHANNELS_TO_SUBSCRIBE:
+            user_channel_status = await bot.get_chat_member(chat_id=group, user_id=message.from_user.id)
+            if user_channel_status["status"] == 'left':
+                await bot.send_message(message.from_user.id, msg_if_not_subscribed)
+                return
         return
 
-    await bot.send_message(message.chat.id, text=text_msg, reply_markup=kb_start)
+    await bot.send_message(message.chat.id, text=text_msg.format(message.from_user.first_name), reply_markup=kb_start)
 
 
 @dp.message_handler(commands=['help'])
@@ -71,7 +77,8 @@ async def post(message: types.Message):
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
 
     if not admin:
-        return
+        text_msg = "Хммм... (ничего не найдено)"
+        return await bot.send_message(message.chat.id, text=text_msg)
 
     await message.answer("🏁 Итак, приступим.\n\n🔗 Вышлите ссылку на фильм или сериал!", reply_markup=kb_cancel)
     await PostState.first()
@@ -89,7 +96,8 @@ async def deferred_post(message: types.Message):
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
 
     if not admin:
-        return
+        text_msg = "Хммм... (ничего не найдено)"
+        return await bot.send_message(message.chat.id, text=text_msg)
 
     posts = session.query(Post).all()
     if not posts:
@@ -126,7 +134,8 @@ async def wait_forward(message: types.Message, state: FSMContext):
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
 
     if not admin:
-        return
+        text_msg = "Хммм... (ничего не найдено)"
+        return await bot.send_message(message.chat.id, text=text_msg)
 
     await message.answer('Жду пост...', reply_markup=button_cancel)
     await ForwardState.cancel_or_message.set()
@@ -153,9 +162,7 @@ async def main(message: types.Message):
 
     for group in CHANNELS_TO_SUBSCRIBE:
         user_channel_status = await bot.get_chat_member(chat_id=group, user_id=message.from_user.id)
-        if user_channel_status["status"] != 'left':
-            pass
-        else:
+        if user_channel_status["status"] == 'left':
             await bot.send_message(message.from_user.id, msg_if_not_subscribed)
             return
 
