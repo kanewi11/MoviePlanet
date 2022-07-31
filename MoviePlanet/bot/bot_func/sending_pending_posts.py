@@ -15,7 +15,7 @@ async def send_post():
     """
 
     while True:
-        posts = session.query(Post).filter(Post.published <= datetime.datetime.now()).all()
+        posts = session.query(Post).filter(Post.date_time <= datetime.datetime.now()).all()
         
         if not posts:
             await asyncio.sleep(20)
