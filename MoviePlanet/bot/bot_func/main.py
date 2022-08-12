@@ -1,5 +1,4 @@
 import json
-import traceback
 
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
@@ -9,9 +8,9 @@ from .utils import send_films, add_user_in_db
 
 from ..messages import msg_start, msg_help, msg_if_not_subscribed
 from ..states import ForwardState, PostState, ChoiceFilmState
-from .. import session, cb, dp, bot, logging
+from .. import session, cb, dp, bot
 from ..keyboards import kb_cancel, kb_start, button_cancel
-from ..models import Admin, Post, User
+from ..models import Admin, Post
 from ..config import CHANNELS_TO_SUBSCRIBE
 
 
@@ -25,17 +24,7 @@ async def command_start(message: types.Message):
     :return:
     """
     text_msg = msg_start
-    user = session.query(User).filter(User.user_id == str(message.from_user.id)).first()
-    if not user:
-        user = User(message.from_user.id)
-        session.add(user)
-
-        try:
-            session.commit()
-            session.refresh()
-        except:
-            logging.warning(traceback.format_exc())
-            session.rollback()
+    await add_user_in_db(user_id=message.from_user.id)
 
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
     if not admin:
