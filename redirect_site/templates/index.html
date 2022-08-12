@@ -1,36 +1,38 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="robots" content="nofollow"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="{{ url_for('static',filename='scripts/jquery.js') }}"></script>
-    <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='styles/style.css') }}">
-    <title>Редирект...</title>
-</head>
-<body>
-    <main>
-        <section>
-            <img src="{{ url_for('static',filename='img/logo.png') }}" alt="MoviePlanet">
-            <h1>Редирект через: <span class="time">5</span></h1>
-        </section>
-    </main>
-    <script>
-        function timer(i) {
-            console.log(i);
-            $('.time').html(i);
-        }
-
-        function redirect() {
-            window.location.href = '{{ q }}';
-        }
-
-        $(document).ready(function() {
-            for (let i = 0; i < 6; i++) {
-                setTimeout(timer, 1000 * i, 5 - i);
-                if (i == 5) redirect();
+    <head>
+        <meta charset="UTF-8">
+        <meta name="robots" content="nofollow"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preload" href="{{ url_for('static',filename='styles/style.css') }}" as="style" />
+        <script src="{{ url_for('static',filename='scripts/jquery.js') }}"></script>
+        <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+        <title>Редирект...</title>
+    </head>
+    <body>
+        <main>
+            <section>
+                <img src="{{ url_for('static',filename='img/logo.png') }}" alt="MoviePlanet">
+                <h1>Просмотр начнется через: <span class="time">5</span></h1>
+            </section>
+        </main>
+        <script>
+            function timer(i) {
+                console.log(i);
+                $('.time').html(i);
             }
-        });
-    </script>
-</body>
+
+            function redirect() {
+                window.location.href = '{{ q }}';
+            }
+
+            setTimeout(redirect, 5000);
+
+            $(document).ready(function() {
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(timer, 1000 * i, 5 - i);
+                }
+            });
+        </script>
+    </body>
 </html>

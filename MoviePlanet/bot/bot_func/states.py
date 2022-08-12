@@ -6,14 +6,15 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext
 from aiogram import types
 
-from ..states import ForwardState, PostState, EditPostState
-from ..models import User, Admin, Post
-from ..search_film import make_post
-from ..keyboards import *
-from .. import session, dp, bot, logging, MY_CHANNEL_URL
+from .utils import send_films, make_post
+from ..states import ForwardState, PostState, EditPostState, ChoiceFilmState
+from ..models import Admin, Post, User
+from ..config import MY_CHANNEL_URL
+from ..keyboards import kb_yes, kb_start
+from .. import session, dp, bot, logging
 
 
-@dp.message_handler(state=ForwardState.cancel_or_message,
+@dp.message_handler(state=ForwardState.CANCEL_OR_MASSAGE,
                     content_types=['video', 'photo', 'document', 'text'],
                     chat_type=types.ChatType.PRIVATE)
 async def forward_msg(message: types.Message, state: FSMContext):
@@ -140,6 +141,7 @@ async def get_post(message: types.Message, state: FSMContext):
     try:
         async with state.proxy() as data:
             data['data'] = await make_post(response)
+
         data = data['data']
         caption = f'🎬 <b>{data["title"]}</b>\n\n' \
                   f'🌎 <b>Год и страна:</b> {data["year_country"]}\n' \
@@ -212,3 +214,16 @@ async def now_or_later(message: types.Message, state: FSMContext):
     except Exception as error:
         await message.answer(f'Произошла ошибка "{error}" введите дату и время в формате дд.мм.гггг чч:мм',
                              reply_markup=ReplyKeyboardRemove())
+
+
+@dp.message_handler(state=ChoiceFilmState.FILM_CHOICE)
+async def send_film_state(message: types.Message, state: FSMContext):
+    """
+    Обработка запроса на поиск фильма или сериала, но в состоянии.
+
+    :param state:
+    :param message:
+    :return:
+    """
+
+    await send_films(message=message, state=state)

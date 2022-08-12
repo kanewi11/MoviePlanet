@@ -1,14 +1,16 @@
 import json
 import traceback
+
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
 from aiogram import types
-from ..states import ForwardState, PostState
-from ..models import User, Admin, Post
-from ..search_film import find_film
+
+from .utils import send_films
+from ..messages import msg_start, msg_help, msg_if_not_subscribed
+from ..states import ForwardState, PostState, ChoiceFilmState
 from .. import session, cb, dp, bot, logging
-from ..keyboards import *
-from ..msg_text import *
+from ..keyboards import kb_cancel, kb_start, button_cancel
+from ..models import Admin, Post, User
 from ..config import *
 
 
@@ -21,24 +23,20 @@ async def command_start(message: types.Message):
     :param message:
     :return:
     """
+    text_msg = msg_start
+    user = session.query(User).filter(User.user_id == str(message.from_user.id)).first()
+    if not user:
+        user = User(message.from_user.id)
+        session.add(user)
 
-    if message.chat.type == "private":
-        text_msg = msg_start
-    else:
-        text_msg = "Этот бот не предназначен для использования в общих чатах."
-
-    r = User(message.from_user.id)
-    session.add(r)
-
-    try:
-        session.commit()
-        session.refresh()
-    except:
-        logging.warning(traceback.format_exc())
-        session.rollback()
+        try:
+            session.commit()
+            session.refresh()
+        except:
+            logging.warning(traceback.format_exc())
+            session.rollback()
 
     admin = session.query(Admin).filter(Admin.user_id == str(message.from_user.id)).first()
-
     if not admin:
         await bot.send_message(message.chat.id, text=text_msg.format(message.from_user.first_name))
         for group in CHANNELS_TO_SUBSCRIBE:
@@ -60,7 +58,7 @@ async def command_help(message: types.Message):
     :return:
     """
 
-    text_msg = text_help
+    text_msg = msg_help
 
     await bot.send_message(message.chat.id, text=text_msg)
 
@@ -106,9 +104,9 @@ async def deferred_post(message: types.Message):
 
     for p in posts:
         kb_edit_delete = InlineKeyboardMarkup(row_width=2)
-        kb_edit_delete.add(
-            InlineKeyboardButton('Изменить ⏱', callback_data=cb.new(id=p.id, action="edit")),
-            InlineKeyboardButton('Удалить ❌', callback_data=cb.new(id=p.id, action="delete")))
+        kb_edit_delete.add(InlineKeyboardButton('Изменить ⏱', callback_data=cb.new(id=p.id, action="edit")),
+                           InlineKeyboardButton('Удалить ❌', callback_data=cb.new(id=p.id, action="delete")))
+
         json_data = json.loads(p.post)
         caption = f'🎬 <b>{json_data["title"]}</b>\n\n' \
                   f'🌎 <b>Год и страна:</b> {json_data["year_country"]}\n' \
@@ -138,54 +136,18 @@ async def wait_forward(message: types.Message, state: FSMContext):
         return await bot.send_message(message.chat.id, text=text_msg)
 
     await message.answer('Жду пост...', reply_markup=button_cancel)
-    await ForwardState.cancel_or_message.set()
+    await ForwardState.CANCEL_OR_MASSAGE.set()
 
 
 @dp.message_handler()
-async def main(message: types.Message):
+async def send_film(message: types.Message, state: FSMContext):
     """
-    Обработка запроса на поиск фильма или сериала.
+    Обработка запроса на поиск фильма или сериала, при первом запросе,
+    последующие запросы обрабатываются в состоянии
 
-    В плане переписать функцию и сделать вывод постранично, а так же обдумать кэширование.
-
+    :param state:
     :param message:
     :return:
     """
-
-    if message.chat.type != "private":
-        text_msg = "Этот бот не предназначен для использования в общих чатах."
-        return await bot.send_message(message.chat.id, text=text_msg)
-
-    if message.text.startswith('/'):
-        text_msg = "Хммм...\nТакой команды не припомню 🤔"
-        return await bot.send_message(message.chat.id, text=text_msg)
-
-    for group in CHANNELS_TO_SUBSCRIBE:
-        user_channel_status = await bot.get_chat_member(chat_id=group, user_id=message.from_user.id)
-        if user_channel_status["status"] == 'left':
-            await bot.send_message(message.from_user.id, msg_if_not_subscribed)
-            return
-
-    await bot.send_message(message.chat.id, text='🔎 Ищу...\nПоиск может занять до 15 секунд.')
-    films = await find_film(message.text)
-
-    if not films:
-        text_msg = "По вашему запросу ничего не найдено 😕"
-        return await bot.send_message(message.chat.id, text=text_msg)
-
-    for film in films:
-        keyboard = types.InlineKeyboardMarkup()
-        keyboard.add(types.InlineKeyboardButton(text="📺 Смотреть",
-                                                url=f'{SITE_URL}/?q=' +
-                                                    film['player']['iframe_url']
-                                                    + '?d=movielab.top'))
-        serial = str()
-        if film['type'] == 'serial':
-            serial = '\n<b>(Сериал)</b>'
-        caption = f'<b>📽 {film["title_ru"]}</b>{serial}\n\n' \
-                  f'<b>Озвучка</b>: {film["player"]["translator"]}\n\n ' \
-                  f'⭐ {film["rating"]}'
-        await bot.send_photo(message.chat.id,
-                             photo=f'https://{film["poster"].replace("//", "").replace("170-233", "680-1000")}',
-                             caption=caption,
-                             reply_markup=keyboard)
+    await send_films(message=message, state=state)
+    await ChoiceFilmState.first()

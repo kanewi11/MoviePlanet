@@ -10,6 +10,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     user_id = Column(String, unique=True, nullable=False)
+    last_message_id = Column(Integer)
 
     def __init__(self, user_id):
         self.user_id = user_id
@@ -35,7 +36,6 @@ class Post(Base):
     id = Column(Integer, primary_key=True)
     post = Column(String())
     date_time = Column(DateTime())
-    published = Column(Boolean())
 
     def __init__(self, post, date_time, published):
         self.post = post

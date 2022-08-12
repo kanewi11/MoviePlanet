@@ -1,5 +1,6 @@
 import asyncio
 import logging
+
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.utils.callback_data import CallbackData
@@ -8,11 +9,8 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from aiogram.utils import executor
 from aiogram import Bot, types
-from .states import ForwardState, PostState, EditPostState
-from .search_film import make_post, find_film
-from .models import User, Admin, Post
-from .keyboards import *
-from .config import *
+
+from .config import API_TOKEN
 
 
 logging.basicConfig(filename="logs.log", level=logging.INFO)
@@ -21,7 +19,8 @@ engine = create_engine('sqlite:///base.db', echo=False)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-cb = CallbackData("post", "id", "action")
+cb = CallbackData('post', 'id', 'action')
+
 
 bot = Bot(token=API_TOKEN, parse_mode=types.ParseMode.HTML)
 dp = Dispatcher(bot, storage=MemoryStorage())

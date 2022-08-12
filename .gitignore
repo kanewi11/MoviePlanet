@@ -5,3 +5,4 @@ venv
 passenger_wsgi.py
 __pycache__
 *.log
+test.py

@@ -1,9 +1,12 @@
 import json
-import asyncio
 import logging
 import datetime
 import traceback
-from .. import session, bot, MY_CHANNEL_URL
+
+import asyncio
+
+from ..config import MY_CHANNEL_URL
+from .. import session, bot
 from ..models import Post
 
 

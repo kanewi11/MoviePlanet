@@ -2,7 +2,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 
 class ForwardState(StatesGroup):
-    cancel_or_message = State()
+    CANCEL_OR_MASSAGE = State()
 
 
 class PostState(StatesGroup):
@@ -13,3 +13,7 @@ class PostState(StatesGroup):
 class EditPostState(StatesGroup):
     ID = State()
     DATE_TIME = State()
+
+
+class ChoiceFilmState(StatesGroup):
+    FILM_CHOICE = State()
