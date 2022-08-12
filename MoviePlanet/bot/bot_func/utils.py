@@ -1,4 +1,5 @@
 import os
+from typing import Union
 import traceback
 
 import requests
@@ -89,7 +90,7 @@ async def find_film(film_name: str) -> list or None:
         return None
 
 
-async def add_user_in_db(user_id: str | int):
+async def add_user_in_db(user_id: Union[str, int]):
     user = session.query(User).filter(User.user_id == str(user_id)).first()
     if not user:
         user = User(str(user_id))
@@ -150,7 +151,7 @@ async def make_post(url: str) -> dict or None:
         return None
 
 
-async def delete_msg(user_id: str | int, message_id: str | int):
+async def delete_msg(user_id: Union[str, int], message_id: Union[str, int]):
     try:
         await bot.delete_message(user_id, message_id)
     except MessageToDeleteNotFound:
@@ -166,7 +167,7 @@ async def make_film_message(film_data: dict) -> (str, str):
     return url_photo, caption
 
 
-async def set_last_message_id_in_db(user_id: str | int, message_id: str | int):
+async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[str, int]):
     user = session.query(User).filter(User.user_id == user_id).first()
     user.last_message_id = int(message_id)
     try:
@@ -179,7 +180,7 @@ async def set_last_message_id_in_db(user_id: str | int, message_id: str | int):
         session.rollback()
 
 
-async def check_subscribe(user_id: str | int) -> bool:
+async def check_subscribe(user_id: Union[str, int]) -> bool:
     for group in CHANNELS_TO_SUBSCRIBE:
         user_channel_status = await bot.get_chat_member(chat_id=group, user_id=user_id)
         if user_channel_status["status"] == 'left':
