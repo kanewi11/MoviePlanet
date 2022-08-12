@@ -5,6 +5,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram import types
 
 from .utils import make_film_message
+
 from ..config import URL_DEFAULT_POSTER, SITE_URL
 from ..keyboards import kb_cancel, kb_start
 from .. import session, cb, dp, logging

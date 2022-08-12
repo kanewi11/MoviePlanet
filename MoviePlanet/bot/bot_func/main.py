@@ -5,13 +5,14 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher import FSMContext
 from aiogram import types
 
-from .utils import send_films
+from .utils import send_films, add_user_in_db
+
 from ..messages import msg_start, msg_help, msg_if_not_subscribed
 from ..states import ForwardState, PostState, ChoiceFilmState
 from .. import session, cb, dp, bot, logging
 from ..keyboards import kb_cancel, kb_start, button_cancel
 from ..models import Admin, Post, User
-from ..config import *
+from ..config import CHANNELS_TO_SUBSCRIBE
 
 
 @dp.message_handler(commands=['start'])
@@ -139,7 +140,7 @@ async def wait_forward(message: types.Message, state: FSMContext):
     await ForwardState.CANCEL_OR_MASSAGE.set()
 
 
-@dp.message_handler()
+@dp.message_handler(content_types=['text'])
 async def send_film(message: types.Message, state: FSMContext):
     """
     Обработка запроса на поиск фильма или сериала, при первом запросе,
@@ -149,5 +150,6 @@ async def send_film(message: types.Message, state: FSMContext):
     :param message:
     :return:
     """
+    await add_user_in_db(user_id=message.from_user.id)
     await send_films(message=message, state=state)
     await ChoiceFilmState.first()

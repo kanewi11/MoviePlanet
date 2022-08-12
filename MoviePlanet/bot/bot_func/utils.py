@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 from aiogram import types
+from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import BadRequest
 from aiogram.utils.exceptions import MessageToDeleteNotFound
 
@@ -26,7 +27,7 @@ with open(os.path.abspath('bot/domain.txt'), 'r') as file:
     domain = file.readline()
 
 
-def get_domain():
+async def get_domain():
     """
     В этой функции мы находим новый домен сайта.
     Сайт меняет свой домен раз в ден, старый домен
@@ -40,7 +41,7 @@ def get_domain():
         file_domain.write(domain)
 
 
-def check_domain(url: str) -> None:
+async def check_domain(url: str) -> None:
     """
      Если в ссылке не присутствует домен из переменной domain,
      вызываем функцию get_domain(), для того,
@@ -51,7 +52,7 @@ def check_domain(url: str) -> None:
     :return: Ничего не возвращает
     """
     if domain not in url:
-        get_domain()
+        await get_domain()
 
 
 async def find_film(film_name: str) -> list or None:
@@ -71,7 +72,7 @@ async def find_film(film_name: str) -> list or None:
     results = []
     try:
         response = requests.post(f'{domain}/api/', headers=headers, data=data)
-        check_domain(response.url)
+        await check_domain(response.url)
         json_response = response.json()
         pages = json_response['pagination']['pages']
         if pages == 1:
@@ -86,6 +87,20 @@ async def find_film(film_name: str) -> list or None:
     except Exception:
         logging.warning(traceback.format_exc())
         return None
+
+
+async def add_user_in_db(user_id: str | int):
+    user = session.query(User).filter(User.user_id == str(user_id)).first()
+    if not user:
+        user = User(user_id)
+        session.add(user)
+
+        try:
+            session.commit()
+            session.refresh()
+        except:
+            logging.warning(traceback.format_exc())
+            session.rollback()
 
 
 async def make_post(url: str) -> dict or None:
@@ -173,7 +188,14 @@ async def check_subscribe(user_id: str | int) -> bool:
     return True
 
 
-async def send_films(message, state):
+async def send_films(message: types.Message, state: FSMContext):
+    """
+    Поиск и отправка фильмов и сериалов
+
+    :param message:
+    :param state:
+    :return:
+    """
     await delete_msg(user_id=message.chat.id, message_id=message.message_id)  # Удаляем сообщение пользователя
 
     user = session.query(User).filter(User.user_id == message.from_user.id).first()

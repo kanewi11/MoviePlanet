@@ -216,7 +216,7 @@ async def now_or_later(message: types.Message, state: FSMContext):
                              reply_markup=ReplyKeyboardRemove())
 
 
-@dp.message_handler(state=ChoiceFilmState.FILM_CHOICE)
+@dp.message_handler(state=ChoiceFilmState.FILM_CHOICE, content_types=['text'])
 async def send_film_state(message: types.Message, state: FSMContext):
     """
     Обработка запроса на поиск фильма или сериала, но в состоянии.
