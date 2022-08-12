@@ -92,7 +92,7 @@ async def find_film(film_name: str) -> list or None:
 async def add_user_in_db(user_id: str | int):
     user = session.query(User).filter(User.user_id == str(user_id)).first()
     if not user:
-        user = User(user_id)
+        user = User(str(user_id))
         session.add(user)
 
         try:
