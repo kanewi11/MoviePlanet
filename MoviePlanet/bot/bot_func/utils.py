@@ -17,7 +17,6 @@ from ..states import ChoiceFilmState
 from ..models import User
 from .. import bot, session, logging, cb
 
-
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/102.0.0.0 Safari/537.36 '
@@ -159,9 +158,10 @@ async def delete_msg(user_id: Union[str, int], message_id: Union[str, int]):
 
 
 async def make_film_message(film_data: dict) -> (str, str):
-    serial = '\n<b>(Сериал)</b>' if film_data['type'] == 'serial' else ''
-    caption = f'<b>📽 {film_data["title_ru"]}</b>{serial}\n\n' \
-              f'<b>Озвучка</b>: {film_data["player"]["translator"]}\n\n ' \
+    serial = '\n\n<b>(Сериал)</b>' if film_data['type'] == 'serial' else ''
+    caption = f'<b>📽 {film_data["title_ru"]}</b> ({film_data["year"]}){serial}\n\n' \
+              f'<b>Озвучка</b>: {film_data["player"]["translator"]}\n' \
+              f'<b>Качество</b>: {film_data["player"]["quality"]}\n\n' \
               f'⭐ {film_data["rating"]}'
     url_photo = f'https://{film_data["poster"].replace("//", "").replace("170-233", "680-1000")}'
     return url_photo, caption
