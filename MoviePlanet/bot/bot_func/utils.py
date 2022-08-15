@@ -1,4 +1,3 @@
-import os
 from typing import Union
 import traceback
 
@@ -17,42 +16,11 @@ from ..states import ChoiceFilmState
 from ..models import User
 from .. import bot, session, logging, cb
 
+
 headers = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
-                  'Chrome/102.0.0.0 Safari/537.36 '
-}
-
-# Домен хранится в файле, открываем файл и записываем домен в переменную domain
-with open(os.path.abspath('bot/domain.txt'), 'r') as file:
-    domain = file.readline()
-
-
-async def get_domain():
-    """
-    В этой функции мы находим новый домен сайта.
-    Сайт меняет свой домен раз в ден, старый домен
-    устаревает за несколько дней и редирект не происходит.
-    1) Отправляем запрос, смотрим url и убираем последний '/'
-    2) Записываем новый домен в domain.txt
-    """
-    global domain
-    domain = requests.get(f'{domain}', headers=headers).url[:-1]
-    with open(os.path.abspath('bot/domain.txt'), 'w') as file_domain:
-        file_domain.write(domain)
-
-
-async def check_domain(url: str) -> None:
-    """
-     Если в ссылке не присутствует домен из переменной domain,
-     вызываем функцию get_domain(), для того,
-     чтобы обновить переменную и файл с доменом.
-
-    :param url: Принимает конечную ссылку после переадресации
-
-    :return: Ничего не возвращает
-    """
-    if domain not in url:
-        await get_domain()
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/102.0.0.0 Safari/537.36 '
+    }
 
 
 async def find_film(film_name: str) -> list or None:
@@ -65,31 +33,41 @@ async def find_film(film_name: str) -> list or None:
     :return: Возвращает список словарей с данными о фильме или сериале, или ничего
     """
     data = {
-        'type': 'search',
-        'query': film_name,
-        'filter-sort': 'rating_asc'
+        'title': film_name,
+        'page': 1,
+        'limit': 100
     }
-    results = []
-    try:
-        response = requests.post(f'{domain}/api/', headers=headers, data=data)
-        await check_domain(response.url)
-        json_response = response.json()
-        pages = json_response['pagination']['pages']
-        if pages == 1:
-            return json_response['results']
-        for page in range(1, pages + 1):
-            data['page'] = page
-            json_response = requests.post(f'{domain}/api/', headers=headers, data=data).json()
-            results += json_response['results']
 
-        del json_response
-        return results
-    except Exception:
-        logging.warning(traceback.format_exc())
+    films = []
+
+    response = requests.post(f'https://api.movielab.info/api/v2/search', headers=headers, json=data)
+    if response.status_code != 200:
         return None
+
+    json_response = response.json()
+
+    pages = json_response['pagination']['pages']
+
+    if pages < 2:
+        return json_response['results']
+
+    for page in range(1, pages + 1):
+        data['page'] = page
+        json_response = requests.post(f'https://api.movielab.info/api/v2/search', headers=headers, json=data).json()
+        films += json_response['results']
+
+    del json_response
+    return films
 
 
 async def add_user_in_db(user_id: Union[str, int]):
+    """
+    Добавление User'а в базу
+
+    :param user_id:
+    :return:
+    """
+
     user = session.query(User).filter(User.user_id == str(user_id)).first()
     if not user:
         user = User(str(user_id))
@@ -98,7 +76,7 @@ async def add_user_in_db(user_id: Union[str, int]):
         try:
             session.commit()
             session.refresh()
-        except:
+        except Exception:
             logging.warning(traceback.format_exc())
             session.rollback()
 
@@ -129,12 +107,10 @@ async def make_post(url: str) -> dict or None:
                            class_='movie-page-container-main-info__data__ratings-star'
                            ).find('span').get_text(' ', strip=True)
 
-        try:
-            serial = soup.find('span', class_='movie-container_serial').get_text(strip=True)
-        except:
-            serial = 'Фильм'
-
-        if not serial:
+        serial = soup.find('span', class_='movie-container_serial')
+        if serial:
+            serial.get_text(strip=True)
+        else:
             serial = 'Фильм'
 
         return {
@@ -163,7 +139,7 @@ async def make_film_message(film_data: dict) -> (str, str):
               f'<b>Озвучка</b>: {film_data["player"]["translator"]}\n' \
               f'<b>Качество</b>: {film_data["player"]["quality"]}\n\n' \
               f'⭐ {film_data["rating"]}'
-    url_photo = f'https://{film_data["poster"].replace("//", "").replace("170-233", "680-1000")}'
+    url_photo = f'{film_data["poster"]}'
     return url_photo, caption
 
 
@@ -173,8 +149,6 @@ async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[
     try:
         session.commit()
         session.refresh()
-    except TypeError:
-        session.rollback()
     except Exception:
         logging.warning(traceback.format_exc())
         session.rollback()
