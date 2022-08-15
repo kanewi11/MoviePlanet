@@ -139,8 +139,10 @@ async def make_film_message(film_data: dict) -> (str, str):
               f'<b>Озвучка</b>: {film_data["player"]["translator"]}\n' \
               f'<b>Качество</b>: {film_data["player"]["quality"]}\n\n' \
               f'⭐ {film_data["rating"]}'
-    url_photo = f'{film_data["poster"]}'
-    return url_photo, caption
+    poster = film_data["poster"]
+    if poster == 'https://api-base.tech/no-poster.jpg':
+        poster = URL_DEFAULT_POSTER
+    return poster, caption
 
 
 async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[str, int]):
@@ -213,9 +215,9 @@ async def send_films(message: types.Message, state: FSMContext):
     else:
         await state.finish()
 
-    url_photo, caption = await make_film_message(film_data=films[0])
+    poster, caption = await make_film_message(film_data=films[0])
     try:
-        message_film = await bot.send_photo(chat_id=message.chat.id, photo=url_photo,
+        message_film = await bot.send_photo(chat_id=message.chat.id, photo=poster,
                                             caption=caption, reply_markup=keyboard)
     except BadRequest:
         message_film = await bot.send_photo(chat_id=message.chat.id, photo=URL_DEFAULT_POSTER,
