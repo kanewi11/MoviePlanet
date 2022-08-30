@@ -108,8 +108,7 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
         p.date_time = date
 
         try:
-            session.commit()
-            session.refresh()
+            session.flush()
         except:
             logging.warning(traceback.format_exc())
             session.rollback()
@@ -203,8 +202,7 @@ async def now_or_later(message: types.Message, state: FSMContext):
             session.add(p)
 
             try:
-                session.commit()
-                session.refresh()
+                session.flush()
             except:
                 logging.warning(traceback.format_exc())
                 session.rollback()

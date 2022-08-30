@@ -39,8 +39,7 @@ async def send_post():
             session.delete(post)
 
         try:
-            session.commit()
-            session.refresh()
+            session.flush()
         except:
             logging.warning(traceback.format_exc())
             session.rollback()

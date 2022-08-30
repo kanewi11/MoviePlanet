@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup as bs
 from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import BadRequest
-from aiogram.utils.exceptions import MessageToDeleteNotFound
+from aiogram.utils.exceptions import MessageToDeleteNotFound, MessageCantBeDeleted
 
 from ..config import CHANNELS_TO_SUBSCRIBE, SITE_URL, URL_DEFAULT_POSTER
 from ..messages import msg_if_not_subscribed
@@ -74,8 +74,7 @@ async def add_user_in_db(user_id: Union[str, int]):
         session.add(user)
 
         try:
-            session.commit()
-            session.refresh()
+            session.flush()
         except Exception:
             logging.warning(traceback.format_exc())
             session.rollback()
@@ -129,7 +128,7 @@ async def make_post(url: str) -> dict or None:
 async def delete_msg(user_id: Union[str, int], message_id: Union[str, int]):
     try:
         await bot.delete_message(user_id, message_id)
-    except MessageToDeleteNotFound:
+    except (MessageToDeleteNotFound, MessageCantBeDeleted):
         pass
 
 
@@ -149,8 +148,7 @@ async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[
     user = session.query(User).filter(User.user_id == user_id).first()
     user.last_message_id = int(message_id)
     try:
-        session.commit()
-        session.refresh()
+        session.flush()
     except Exception:
         logging.warning(traceback.format_exc())
         session.rollback()
