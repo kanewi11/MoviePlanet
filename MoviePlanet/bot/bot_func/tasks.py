@@ -40,6 +40,7 @@ async def send_post():
 
         try:
             session.flush()
+            session.commit()
         except:
             logging.warning(traceback.format_exc())
             session.rollback()

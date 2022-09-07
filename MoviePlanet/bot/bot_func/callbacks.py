@@ -27,6 +27,7 @@ async def callback_delete_post(call: types.CallbackQuery, callback_data: dict):
 
     try:
         session.flush()
+        session.commit()
     except Exception:
         logging.warning(traceback.format_exc())
         session.rollback()

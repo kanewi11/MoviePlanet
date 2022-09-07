@@ -75,6 +75,7 @@ async def add_user_in_db(user_id: Union[str, int]):
 
         try:
             session.flush()
+            session.commit()
         except Exception:
             logging.warning(traceback.format_exc())
             session.rollback()
@@ -149,6 +150,7 @@ async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[
     user.last_message_id = int(message_id)
     try:
         session.flush()
+        session.commit()
     except Exception:
         logging.warning(traceback.format_exc())
         session.rollback()
