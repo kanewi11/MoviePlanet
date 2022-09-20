@@ -4,12 +4,11 @@ from aiogram.utils.exceptions import BadRequest
 from aiogram.dispatcher import FSMContext
 from aiogram import types
 
-from .utils import make_film_message
-
+from .utils import get_caption_for_bot
+from .states import EditPostState
 from ..config import URL_DEFAULT_POSTER, SITE_URL
 from ..keyboards import kb_cancel, kb_start
 from .. import session, cb, dp, logging
-from ..states import EditPostState
 from ..models import Post
 
 
@@ -22,11 +21,10 @@ async def callback_delete_post(call: types.CallbackQuery, callback_data: dict):
     :param callback_data:
     :return:
     """
-    p = session.query(Post).filter(Post.id == int(callback_data['id'])).first()
-    session.delete(p)
+    post = session.query(Post).filter(Post.id == int(callback_data['id'])).first()
+    session.delete(post)
 
     try:
-        session.flush()
         session.commit()
     except Exception:
         logging.warning(traceback.format_exc())
@@ -76,15 +74,15 @@ async def choice_film(call: types.CallbackQuery, callback_data: dict, state: FSM
     keyboard.add(types.InlineKeyboardButton(text=f'📺 Смотреть ({id_film + 1} из {len(films)})',
                                             url=f'{SITE_URL}/?q={films[id_film]["player"]["iframe_url"]}'))
 
-    if id_film != len(films) - 1 and id_film != 0:
+    if id_film != len(films) - 1 and id_film != 0:  # Если фильм не первый и не последний
         keyboard.add(types.InlineKeyboardButton('◀️ Предыдущий', callback_data=cb.new(id=id_film, action='previous')),
                      types.InlineKeyboardButton('Следующий ▶️', callback_data=cb.new(id=id_film, action='next')))
-    elif id_film == 0:
+    elif id_film == 0:  # Если фильм первый
         keyboard.add(types.InlineKeyboardButton('Следующий ▶️', callback_data=cb.new(id=id_film, action='next')))
-    else:
+    else:  # Если последний
         keyboard.add(types.InlineKeyboardButton('◀️ Предыдущий', callback_data=cb.new(id=id_film, action='previous')))
 
-    url_photo, caption = await make_film_message(films[id_film])
+    url_photo, caption = await get_caption_for_bot(films[id_film])
     photo = types.InputMediaPhoto(media=url_photo, caption=caption)
 
     try:

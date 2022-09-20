@@ -1,5 +1,6 @@
 import os
 
+
 API_TOKEN = os.environ.get('TOKEN')
 SITE_URL = 'https://kingzmsk.ru'
 MY_CHANNEL_URL = '@movies_from_planet'

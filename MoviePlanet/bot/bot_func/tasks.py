@@ -5,12 +5,13 @@ import traceback
 
 import asyncio
 
+from .utils import get_caption_for_channel
 from ..config import MY_CHANNEL_URL
 from .. import session, bot
 from ..models import Post
 
 
-async def send_post():
+async def send_post() -> None:
     """
     Функция отправки отложенных сообщений.
 
@@ -26,20 +27,12 @@ async def send_post():
 
         for post in posts:
             json_data = json.loads(post.post)
-            caption = f'🎬 <b>{json_data["title"]}</b>\n\n' \
-                      f'🌎 <b>Год и страна:</b> {json_data["year_country"]}\n' \
-                      f'({json_data["serial"]})\n\n' \
-                      f'⭐️ {json_data["rating"]}\n\n' \
-                      f'<i>{json_data["description"]}</i>\n\n' \
-                      f'<b>Бот в закрепе ☝️ </b>'
+            caption = get_caption_for_channel(data=json_data)
             chat_id = await bot.get_chat(MY_CHANNEL_URL)
-            await bot.send_photo(chat_id=chat_id.id,
-                                 photo=f'https://{json_data["poster"]}',
-                                 caption=caption)
+            await bot.send_photo(chat_id=chat_id.id, photo=f'https://{json_data["poster"]}', caption=caption)
             session.delete(post)
 
         try:
-            session.flush()
             session.commit()
         except:
             logging.warning(traceback.format_exc())
