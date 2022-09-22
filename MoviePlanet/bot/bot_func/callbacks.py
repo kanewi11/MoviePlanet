@@ -5,9 +5,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram import types
 
 from .utils import get_caption_for_bot
-from .states import EditPostState
+from .states_group import EditPostState
 from ..config import URL_DEFAULT_POSTER, SITE_URL
-from ..keyboards import kb_cancel, kb_start
+from ..keyboards import kb_cancel, kb_admin
 from .. import session, cb, dp, logging
 from ..models import Post
 
@@ -30,7 +30,7 @@ async def callback_delete_post(call: types.CallbackQuery, callback_data: dict):
         logging.warning(traceback.format_exc())
         session.rollback()
 
-    await call.message.answer('Пост удален 🗑', reply_markup=kb_start)
+    await call.message.answer('Пост удален 🗑', reply_markup=kb_admin)
 
 
 @dp.callback_query_handler(cb.filter(action=['edit']), state='*')
@@ -87,6 +87,6 @@ async def choice_film(call: types.CallbackQuery, callback_data: dict, state: FSM
 
     try:
         await call.message.edit_media(media=photo, reply_markup=keyboard)
-    except BadRequest:
+    except BadRequest:  # Из-за того, что постер не может загрузиться или открыться в тг, нужно поменять его на наш
         photo = types.InputMediaPhoto(media=URL_DEFAULT_POSTER, caption=caption)
         await call.message.edit_media(media=photo, reply_markup=keyboard)

@@ -2,34 +2,16 @@ import json
 import datetime
 import traceback
 
-from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher import FSMContext
 from aiogram import types
 
 from .utils import send_films, get_data_about_film, forward_message, get_caption_for_channel
-from ..models import Admin, Post, User
+from .states_group import ForwardState, EditPostState, PostState, ChoiceFilmState
+from ..models import Post, User
 from ..config import MY_CHANNEL_URL
-from ..keyboards import kb_yes, kb_start
+from ..keyboards import kb_yes, kb_admin
 from .. import session, dp, bot, logging
-
-
-class ForwardState(StatesGroup):
-    CANCEL_OR_MASSAGE = State()
-
-
-class PostState(StatesGroup):
-    DATA = State()
-    DATE_TIME = State()
-
-
-class EditPostState(StatesGroup):
-    ID = State()
-    DATE_TIME = State()
-
-
-class ChoiceFilmState(StatesGroup):
-    FILM_CHOICE = State()
 
 
 @dp.message_handler(state=ForwardState.CANCEL_OR_MASSAGE,
@@ -44,11 +26,8 @@ async def forward_msg(message: types.Message, state: FSMContext):
     :return:
     """
     if message.text == 'Отмена':
-        await message.answer('Операция отменена', reply_markup=kb_start)
+        await message.answer('Операция отменена', reply_markup=kb_admin)
         await state.finish()
-        return
-
-    if not session.query(Admin).filter(Admin.user_id == message.from_user.id).first():
         return
 
     users = session.query(User).all()
@@ -59,7 +38,7 @@ async def forward_msg(message: types.Message, state: FSMContext):
         except Exception:
             logging.warning(traceback.format_exc())
 
-    await message.answer('Рассылка выполнена', reply_markup=kb_start)
+    await message.answer('Рассылка выполнена', reply_markup=kb_admin)
     await state.finish()
 
 
@@ -75,7 +54,7 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
 
     response = message.text
     if response == 'Отмена':
-        await message.answer('Операция отменена ❌', reply_markup=kb_start)
+        await message.answer('Операция отменена ❌', reply_markup=kb_admin)
         await state.finish()
         return
 
@@ -85,7 +64,7 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
         date = datetime.datetime.strptime(response.strip(), '%d.%m.%Y %H:%M')
         p = session.query(Post).filter(Post.id == int(post_id)).first()
         if not p:
-            await message.answer('Ошибка, пост не найден 😞', reply_markup=kb_start)
+            await message.answer('Ошибка, пост не найден 😞', reply_markup=kb_admin)
             await state.finish()
             return
 
@@ -97,11 +76,11 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
             logging.warning(traceback.format_exc())
             session.rollback()
 
-        await message.answer(f'✅ Пост будет опубликован {response}', reply_markup=kb_start)
+        await message.answer(f'✅ Пост будет опубликован {response}', reply_markup=kb_admin)
         await state.finish()
         return
     except Exception as error:
-        await message.answer(f'😫 Ошибка {error}', reply_markup=kb_start)
+        await message.answer(f'😫 Ошибка {error}', reply_markup=kb_admin)
 
 
 @dp.message_handler(state=PostState.DATA)
@@ -116,7 +95,7 @@ async def get_post(message: types.Message, state: FSMContext):
 
     response = message.text
     if response == 'Отмена':
-        await message.answer('Операция отменена ❌', reply_markup=kb_start)
+        await message.answer('Операция отменена ❌', reply_markup=kb_admin)
         await state.finish()
         return
 
@@ -136,7 +115,7 @@ async def get_post(message: types.Message, state: FSMContext):
         await PostState.next()
     except Exception as error:
         await message.answer(f'Произошла ошибка "{error}",\n Попробуйте заново!',
-                             reply_markup=kb_start)
+                             reply_markup=kb_admin)
         await state.finish()
         return
 
@@ -153,18 +132,18 @@ async def now_or_later(message: types.Message, state: FSMContext):
 
     response = message.text
     if response == 'Выслать сейчас 🚀':
-        await message.answer('💬 Высылаю...', reply_markup=kb_start)
+        await message.answer('💬 Высылаю...', reply_markup=kb_admin)
         async with state.proxy() as data:
             post_data = data['data']
 
         caption = await get_caption_for_channel(data=post_data)
         chat_id = await bot.get_chat(MY_CHANNEL_URL)
         await bot.send_photo(chat_id=chat_id.id, photo=f'https://{post_data["poster"]}', caption=caption)
-        await message.answer(text='✅ Выслал.', reply_markup=kb_start)
+        await message.answer(text='✅ Выслал.', reply_markup=kb_admin)
         await state.finish()
         return
     elif response == 'Отмена':
-        await message.answer('Операция отменена ❌', reply_markup=kb_start)
+        await message.answer('Операция отменена ❌', reply_markup=kb_admin)
         await state.finish()
         return
 
@@ -184,7 +163,7 @@ async def now_or_later(message: types.Message, state: FSMContext):
         await message.answer(f'Произошла ошибка "{error}" введите дату и время в формате дд.мм.гггг чч:мм',
                              reply_markup=ReplyKeyboardRemove())
 
-    await message.answer(f'🕧 Пост будет опубликован {response}', reply_markup=kb_start)
+    await message.answer(f'🕧 Пост будет опубликован {response}', reply_markup=kb_admin)
     await state.finish()
 
 

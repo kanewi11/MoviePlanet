@@ -8,10 +8,11 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.utils.exceptions import MessageToDeleteNotFound, MessageCantBeDeleted
 
-from .states import ChoiceFilmState
+from .decorators import only_admin, subscribers_only
+from .states_group import ChoiceFilmState
 from ..config import CHANNELS_TO_SUBSCRIBE, SITE_URL, URL_DEFAULT_POSTER
-from ..messages import msg_if_not_subscribed
-from ..keyboards import kb_cancel_search
+from ..messages import msg_if_not_subscribed, msg_start
+from ..keyboards import kb_cancel_search, kb_admin
 from ..models import User
 from .. import bot, session, logging, cb
 
@@ -158,17 +159,6 @@ async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[
         session.rollback()
 
 
-async def check_subscribe(user_id: Union[str, int]) -> bool:
-    """Проверяем подписан ли пользователь на группы/у"""
-
-    for group in CHANNELS_TO_SUBSCRIBE:
-        user_channel_status = await bot.get_chat_member(chat_id=group, user_id=user_id)
-        if user_channel_status['status'] == 'left':
-            await bot.send_message(user_id=user_id, text=msg_if_not_subscribed)
-            return False
-    return True
-
-
 async def delete_last_user_message(message: types.Message) -> None:
     """Удаление последнего поиска пользователя"""
 
@@ -180,14 +170,12 @@ async def delete_last_user_message(message: types.Message) -> None:
         await delete_msg(user_id=message.chat.id, message_id=last_film_message_id + 1)
 
 
+@subscribers_only
 async def send_films(message: types.Message, state: FSMContext) -> None:
     """Поиск и отправка фильмов и сериалов"""
 
     await delete_msg(user_id=message.chat.id, message_id=message.message_id)  # Удаляем сообщение пользователя
     await delete_last_user_message(message=message)  # Удаляем последнее сообщение (последний поиск)
-
-    if not await check_subscribe(user_id=message.from_user.id):  # Проверяем подписан ли на канал
-        return
 
     if message.text.startswith('/') or message.text == 'Прекратить поиск фильма 🙅‍♂':
         await delete_msg(user_id=message.chat.id, message_id=message.message_id)
@@ -260,3 +248,17 @@ async def get_caption_for_channel(data: dict) -> str:
               f'<i>{data["description"]}</i>\n\n' \
               f'<b>Бот в закрепе ☝️ </b>'
     return caption
+
+
+async def check_is_subscriber(message: types.Message):
+    for group in CHANNELS_TO_SUBSCRIBE:
+        user_channel_status = await bot.get_chat_member(chat_id=group, user_id=message.from_user.id)
+        if user_channel_status['status'] == 'left':
+            await bot.send_message(message.from_user.id, msg_if_not_subscribed)
+            return False
+    return True
+
+
+@only_admin
+async def admin_keyboard(message: types.Message):
+    await bot.send_message(message.chat.id, text=msg_start.format(message.from_user.first_name), reply_markup=kb_admin)

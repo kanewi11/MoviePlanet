@@ -5,7 +5,7 @@ kb_cancel = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Отм
 button_cancel = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True).add(KeyboardButton('Отмена'))
 kb_yes = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Выслать сейчас 🚀'), KeyboardButton('Отмена'))
 
-kb_start = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Сделать пост фильма 🤳'),
+kb_admin = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Сделать пост фильма 🤳'),
                                                          KeyboardButton('Отложенные посты 🕜'),
                                                          KeyboardButton('Рекламный пост 💰'))
 
