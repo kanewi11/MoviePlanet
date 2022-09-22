@@ -10,8 +10,8 @@ from aiogram.utils.exceptions import MessageToDeleteNotFound, MessageCantBeDelet
 
 from .decorators import only_admin, subscribers_only
 from .states_group import ChoiceFilmState
-from ..config import CHANNELS_TO_SUBSCRIBE, SITE_URL, URL_DEFAULT_POSTER
-from ..messages import msg_if_not_subscribed, msg_start
+from ..config import SITE_URL, URL_DEFAULT_POSTER
+from ..messages import msg_start
 from ..keyboards import kb_cancel_search, kb_admin
 from ..models import User
 from .. import bot, session, logging, cb
@@ -28,8 +28,7 @@ async def find_film(film_name: str) -> Union[list, None]:
     Ищем фильмы, передаем в функцию название фильма или сериала
     Если находим возвращаем результат словарей в списке, в противном случае возвращаем None
 
-    :param film_name: Название фильма или сериала
-
+    :param film_name: Название фильма или сериала.
     :return: Возвращает список словарей с данными о фильме или сериале, или ничего
     """
     data = {
@@ -67,17 +66,17 @@ async def add_user_in_db(user_id: Union[str, int]) -> None:
     :param user_id:
     :return:
     """
+    is_new_user = session.query(User).filter(User.user_id == str(user_id)).first()
+    if is_new_user:
+        return
 
-    user = session.query(User).filter(User.user_id == str(user_id)).first()
-    if not user:
-        user = User(str(user_id))
+    user = User(str(user_id))
+    try:
         session.add(user)
-
-        try:
-            session.commit()
-        except Exception:
-            logging.warning(traceback.format_exc())
-            session.rollback()
+        session.commit()
+    except Exception:
+        logging.warning(traceback.format_exc())
+        session.rollback()
 
 
 async def get_data_about_film(url: str) -> Union[dict, None]:
@@ -85,11 +84,9 @@ async def get_data_about_film(url: str) -> Union[dict, None]:
     Парсим сайт по ссылке и делаем пост, если все отлично возвращаем словарь,
     в противном случае None
 
-    :param url: Ссылка на фильм или сериал
-
+    :param url: Ссылка на фильм или сериал.
     :return: Возвращает словарь с данными или ничего
     """
-
     response = requests.get(url, headers=HEADERS)
 
     if response.status_code != 200:
@@ -120,20 +117,16 @@ async def get_data_about_film(url: str) -> Union[dict, None]:
 
 async def delete_msg(user_id: Union[str, int], message_id: Union[str, int]) -> None:
     """Удаляем сообщение"""
-
     try:
         await bot.delete_message(user_id, message_id)
-    except MessageToDeleteNotFound:
-        logging.info(traceback.format_exc())
-    except MessageCantBeDeleted:
-        logging.info(traceback.format_exc())
+    except (MessageToDeleteNotFound, MessageCantBeDeleted):
+        pass
     except Exception:
         logging.warning(traceback.format_exc())
 
 
 async def get_caption_for_bot(film_data: dict) -> (str, str):
     """Создаем описание фильма или сериала, а так же если нет постера, меняем на свой"""
-
     serial = '\n\n<b>(Сериал)</b>' if film_data['type'] == 'serial' else ''
     caption = f'<b>📽 {film_data["title_ru"]}</b> ({film_data["year"]}){serial}\n\n' \
               f'<b>Озвучка</b>: {film_data["player"]["translator"]}\n' \
@@ -149,10 +142,9 @@ async def get_caption_for_bot(film_data: dict) -> (str, str):
 
 async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[str, int]) -> None:
     """Записываем в бд id последнего сообщения пользователя, чтобы его потом удалить"""
-
     user = session.query(User).filter(User.user_id == user_id).first()
-    user.last_message_id = int(message_id)
     try:
+        user.last_message_id = int(message_id)
         session.commit()
     except Exception:
         logging.warning(traceback.format_exc())
@@ -161,7 +153,6 @@ async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[
 
 async def delete_last_user_message(message: types.Message) -> None:
     """Удаление последнего поиска пользователя"""
-
     user = session.query(User).filter(User.user_id == message.from_user.id).first()
     last_film_message_id = user.last_message_id
     if last_film_message_id:
@@ -173,7 +164,6 @@ async def delete_last_user_message(message: types.Message) -> None:
 @subscribers_only
 async def send_films(message: types.Message, state: FSMContext) -> None:
     """Поиск и отправка фильмов и сериалов"""
-
     await delete_msg(user_id=message.chat.id, message_id=message.message_id)  # Удаляем сообщение пользователя
     await delete_last_user_message(message=message)  # Удаляем последнее сообщение (последний поиск)
 
@@ -189,7 +179,6 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
     if not films:
         # Если не нашел фильм отсылаем сообщение о том что не нашел и записываем id сообщение в базу
         # для того, чтобы при следующем поиске его удалить
-
         text_msg = "По вашему запросу ничего не найдено 😕"
         not_found_message = await bot.send_message(chat_id=message.chat.id, text=text_msg)
         await set_last_message_id_in_db(user_id=message.from_user.id, message_id=not_found_message.message_id)
@@ -239,7 +228,6 @@ async def forward_message(message: types.Message, user_id: Union[str, int]) -> N
 
 async def get_caption_for_channel(data: dict) -> str:
     """Создание описания для поста в группу"""
-
     caption = f'🎬 <b>{data["title"]}</b>\n\n' \
               f'🌎 <b>Год и страна:</b> {data["year_country"]}\n' \
               f'({data["serial"]})\n\n' \
@@ -249,15 +237,7 @@ async def get_caption_for_channel(data: dict) -> str:
     return caption
 
 
-async def check_is_subscriber(message: types.Message):
-    for group in CHANNELS_TO_SUBSCRIBE:
-        user_channel_status = await bot.get_chat_member(chat_id=group, user_id=message.from_user.id)
-        if user_channel_status['status'] == 'left':
-            await bot.send_message(message.from_user.id, msg_if_not_subscribed)
-            return False
-    return True
-
-
 @only_admin
 async def admin_keyboard(message: types.Message):
+    """Высылаем кнопки для администратора"""
     await bot.send_message(message.chat.id, text=msg_start.format(message.from_user.first_name), reply_markup=kb_admin)
