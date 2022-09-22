@@ -235,8 +235,6 @@ async def forward_message(message: types.Message, user_id: Union[str, int]) -> N
             await bot.send_video(user_id, message.video.file_id, caption=message.caption)
         else:
             await bot.send_video(user_id, message.video.file_id)
-    else:
-        await bot.send_message(user_id, 'Данный формат не поддерживается')
 
 
 async def get_caption_for_channel(data: dict) -> str:
