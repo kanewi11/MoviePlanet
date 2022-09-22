@@ -217,25 +217,26 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
 
 async def forward_message(message: types.Message, user_id: Union[str, int]) -> None:
     """Пересылка сообщения"""
-
-    match message.content_type:
-        case 'text':
-            await bot.send_message(user_id, message.text)
-        case 'photo':
-            if message.caption:
-                await bot.send_photo(user_id, message.photo[-1].file_id, caption=message.caption)
-            else:
-                await bot.send_photo(user_id, message.photo[-1].file_id)
-        case 'document':
-            if message.caption:
-                await bot.send_document(user_id, message.document.file_id, caption=message.caption)
-            else:
-                await bot.send_document(user_id, message.document.file_id)
-        case 'video':
-            if message.caption:
-                await bot.send_video(user_id, message.video.file_id, caption=message.caption)
-            else:
-                await bot.send_video(user_id, message.video.file_id)
+    content_type = message.content_type
+    if content_type == 'text':
+        await bot.send_message(user_id, message.text)
+    elif content_type == 'photo':
+        if message.caption:
+            await bot.send_photo(user_id, message.photo[-1].file_id, caption=message.caption)
+        else:
+            await bot.send_photo(user_id, message.photo[-1].file_id)
+    elif content_type == 'document':
+        if message.caption:
+            await bot.send_document(user_id, message.document.file_id, caption=message.caption)
+        else:
+            await bot.send_document(user_id, message.document.file_id)
+    elif content_type == 'video':
+        if message.caption:
+            await bot.send_video(user_id, message.video.file_id, caption=message.caption)
+        else:
+            await bot.send_video(user_id, message.video.file_id)
+    else:
+        await bot.send_message(user_id, 'Данный формат не поддерживается')
 
 
 async def get_caption_for_channel(data: dict) -> str:
