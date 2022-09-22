@@ -182,6 +182,7 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
         text_msg = "По вашему запросу ничего не найдено 😕"
         not_found_message = await bot.send_message(chat_id=message.chat.id, text=text_msg)
         await set_last_message_id_in_db(user_id=message.from_user.id, message_id=not_found_message.message_id)
+        await state.finish()
         return
 
     keyboard = types.InlineKeyboardMarkup()
@@ -240,4 +241,4 @@ async def get_caption_for_channel(data: dict) -> str:
 @only_admin
 async def admin_keyboard(message: types.Message):
     """Высылаем кнопки для администратора"""
-    await bot.send_message(message.chat.id, text=msg_start.format(message.from_user.first_name), reply_markup=kb_admin)
+    await bot.send_message(message.chat.id, text='Вы - администратор 😎', reply_markup=kb_admin)

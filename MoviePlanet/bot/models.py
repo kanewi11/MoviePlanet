@@ -13,6 +13,7 @@ class User(Base):
     last_message_id = Column(Integer)
 
     def __init__(self, user_id):
+        super().__init__()
         self.user_id = user_id
 
     def __repr__(self):
@@ -25,6 +26,7 @@ class Admin(Base):
     user_id = Column(String, unique=True, nullable=False)
 
     def __init__(self, user_id):
+        super().__init__()
         self.user_id = user_id
 
     def __repr__(self):
@@ -38,6 +40,7 @@ class Post(Base):
     date_time = Column(DateTime())
 
     def __init__(self, post, date_time, published):
+        super().__init__()
         self.post = post
         self.date_time = date_time
         self.published = published
