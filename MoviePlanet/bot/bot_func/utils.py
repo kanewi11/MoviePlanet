@@ -11,7 +11,6 @@ from aiogram.utils.exceptions import MessageToDeleteNotFound, MessageCantBeDelet
 from .decorators import only_admin, subscribers_only
 from .states_group import ChoiceFilmState
 from ..config import SITE_URL, URL_DEFAULT_POSTER
-from ..messages import msg_start
 from ..keyboards import kb_cancel_search, kb_admin
 from ..models import User
 from .. import bot, session, logging, cb
@@ -21,6 +20,9 @@ HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) '
                   'Chrome/102.0.0.0 Safari/537.36 '
 }
+
+API_URL = 'https://api.movielab.pro/api/v2/'
+METHOD_SEARCH = 'search'
 
 
 async def find_film(film_name: str) -> Union[list, None]:
@@ -39,7 +41,7 @@ async def find_film(film_name: str) -> Union[list, None]:
 
     films = []
 
-    response = requests.post(f'https://api.movielab.info/api/v2/search', headers=HEADERS, json=data)
+    response = requests.post(API_URL + METHOD_SEARCH, headers=HEADERS, json=data)
     if response.status_code != 200:
         return None
 
@@ -52,7 +54,7 @@ async def find_film(film_name: str) -> Union[list, None]:
 
     for page in range(1, pages + 1):
         data['page'] = page
-        json_response = requests.post(f'https://api.movielab.info/api/v2/search', headers=HEADERS, json=data).json()
+        json_response = requests.post(API_URL + METHOD_SEARCH, headers=HEADERS, json=data).json()
         films += json_response['results']
 
     del json_response
@@ -156,9 +158,7 @@ async def delete_last_user_message(message: types.Message) -> None:
     user = session.query(User).filter(User.user_id == message.from_user.id).first()
     last_film_message_id = user.last_message_id
     if last_film_message_id:
-        await delete_msg(user_id=message.chat.id, message_id=last_film_message_id)  # Удаляем последний фильм
-        # Удаляем сообщение после последнего фильма "Чтобы выйти из поиска, нажмите кнопку ⬇️"
-        await delete_msg(user_id=message.chat.id, message_id=last_film_message_id + 1)
+        await delete_msg(user_id=message.chat.id, message_id=last_film_message_id)
 
 
 @subscribers_only

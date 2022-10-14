@@ -80,5 +80,4 @@ def cancel_handler(func):
             return await state.finish()
 
         await func(*args, **kwargs)
-
     return wrapper
