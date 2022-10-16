@@ -9,7 +9,7 @@ from .utils import send_films, add_user_in_db, get_caption_for_channel, admin_ke
 from .states_group import ForwardState, PostState, ChoiceFilmState
 from ..messages import msg_start, msg_help
 from .. import session, cb, dp, bot
-from ..keyboards import kb_cancel, button_cancel
+from ..keyboards import markup_cancel
 from ..models import Post
 
 
@@ -35,7 +35,7 @@ async def command_help(message: types.Message):
 @dp.message_handler(text='Сделать пост фильма 🤳')
 async def make_post(message: types.Message):
     """Функция перенаправления на машину состояния для создания поста в группе"""
-    await message.answer("🏁 Итак, приступим.\n\n🔗 Вышлите ссылку на фильм или сериал!", reply_markup=kb_cancel)
+    await message.answer("🏁 Итак, приступим.\n\n🔗 Вышлите ссылку на фильм или сериал!", reply_markup=markup_cancel)
     await PostState.first()
 
 
@@ -66,7 +66,7 @@ async def deferred_post(message: types.Message):
 @dp.message_handler(text='Рекламный пост 💰')
 async def wait_forward(message: types.Message):
     """Функция для отправки рекламного поста (не полностью дописана из-за ненадобности)"""
-    await message.answer('Жду пост...', reply_markup=button_cancel)
+    await message.answer('Жду пост...', reply_markup=markup_cancel)
     await ForwardState.CANCEL_OR_MASSAGE.set()
 
 

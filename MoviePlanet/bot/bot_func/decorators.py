@@ -7,7 +7,7 @@ from aiogram.dispatcher import FSMContext
 from ..models import Admin
 from ..config import CHANNELS_TO_SUBSCRIBE
 from ..messages import msg_if_not_subscribed
-from ..keyboards import kb_admin
+from ..keyboards import markup_admin
 from .. import bot, session
 
 
@@ -76,8 +76,13 @@ def cancel_handler(func):
         message = await get_need_object_from_args(args, kwargs, types.Message)
         state = await get_need_object_from_args(args, kwargs, FSMContext)
         if message.text.startswith('/') or message.text == 'Отмена':
-            await message.answer(text='Операция отменена!', reply_markup=kb_admin)
-            return await state.finish()
+            await message.answer(text='Операция отменена!', reply_markup=markup_admin)
+            try:
+                await state.finish()
+            except Exception:
+                pass
+            finally:
+                return
 
         await func(*args, **kwargs)
     return wrapper

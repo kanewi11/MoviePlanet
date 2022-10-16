@@ -11,7 +11,7 @@ from aiogram.utils.exceptions import MessageToDeleteNotFound, MessageCantBeDelet
 from .decorators import only_admin, subscribers_only
 from .states_group import ChoiceFilmState
 from ..config import SITE_URL, URL_DEFAULT_POSTER
-from ..keyboards import kb_cancel_search, kb_admin
+from ..keyboards import markup_cancel_search, markup_admin
 from ..models import User
 from .. import bot, session, logging, cb
 
@@ -169,6 +169,7 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
 
     if message.text.startswith('/') or message.text == 'Прекратить поиск фильма 🙅‍♂':
         await delete_msg(user_id=message.chat.id, message_id=message.message_id)
+        await delete_msg(user_id=message.chat.id, message_id=message.message_id + 1)
         await state.finish()
         return
 
@@ -200,7 +201,8 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
     poster, caption = await get_caption_for_bot(film_data=films[0])
     message_film = await bot.send_photo(chat_id=message.chat.id, photo=poster, caption=caption, reply_markup=keyboard)
 
-    await bot.send_message(message.chat.id, 'Чтобы выйти из поиска, нажмите кнопку ⬇️', reply_markup=kb_cancel_search)
+    await bot.send_message(message.chat.id, 'Чтобы выйти из поиска, нажмите кнопку ⬇️',
+                           reply_markup=markup_cancel_search)
     # Записываем id отправленного сообщения с фильмом/и чтобы при след запросе его удалить
     await set_last_message_id_in_db(user_id=message.from_user.id, message_id=message_film.message_id)
 
@@ -241,4 +243,4 @@ async def get_caption_for_channel(data: dict) -> str:
 @only_admin
 async def admin_keyboard(message: types.Message):
     """Высылаем кнопки для администратора"""
-    await bot.send_message(message.chat.id, text='Вы - администратор 😎', reply_markup=kb_admin)
+    await bot.send_message(message.chat.id, text='Вы - администратор 😎', reply_markup=markup_admin)

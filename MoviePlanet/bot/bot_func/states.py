@@ -12,7 +12,7 @@ from .utils import send_films, get_data_about_film, forward_message, get_caption
 from .states_group import ForwardState, EditPostState, PostState, ChoiceFilmState
 from ..models import Post, User
 from ..config import MY_CHANNEL_URL
-from ..keyboards import kb_yes, kb_admin
+from ..keyboards import markup_yes, markup_admin
 from .. import session, dp, bot, logging
 
 
@@ -37,7 +37,7 @@ async def forward_msg(message: types.Message, state: FSMContext):
         except Exception:
             logging.warning(traceback.format_exc())
 
-    await message.answer('Рассылка выполнена', reply_markup=kb_admin)
+    await message.answer('Рассылка выполнена', reply_markup=markup_admin)
     await state.finish()
 
 
@@ -53,7 +53,7 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
     date = datetime.datetime.strptime(response.strip(), '%d.%m.%Y %H:%M')
     post = session.query(Post).filter(Post.id == int(post_id)).first()
     if not post:
-        await message.answer('Ошибка, пост не найден 😞', reply_markup=kb_admin)
+        await message.answer('Ошибка, пост не найден 😞', reply_markup=markup_admin)
         await state.finish()
         return
 
@@ -63,11 +63,11 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
     except Exception as error:
         logging.warning(traceback.format_exc())
         session.rollback()
-        await message.answer(f'😫 Ошибка {error}', reply_markup=kb_admin)
+        await message.answer(f'😫 Ошибка {error}', reply_markup=markup_admin)
         await state.finish()
         return
 
-    await message.answer(f'✅ Пост будет опубликован {response}', reply_markup=kb_admin)
+    await message.answer(f'✅ Пост будет опубликован {response}', reply_markup=markup_admin)
     await state.finish()
 
 
@@ -94,11 +94,11 @@ async def get_post(message: types.Message, state: FSMContext):
 
         await bot.send_photo(chat_id=message.from_user.id, photo=f'https://{post_data["poster"]}', caption=caption)
         await message.answer('⏱ Выслать сейчас?\nИли вышлите дату и время, например:\n\n<b>01.01.2022 09:00</b>',
-                             reply_markup=kb_yes)
+                             reply_markup=markup_yes)
         await PostState.next()
     except Exception as error:
         logging.warning(traceback.format_exc())
-        await message.answer(f'Произошла ошибка "{error}",\n Попробуйте заново!', reply_markup=kb_admin)
+        await message.answer(f'Произошла ошибка "{error}",\n Попробуйте заново!', reply_markup=markup_admin)
         await state.finish()
         return
 
@@ -109,14 +109,14 @@ async def now_or_later(message: types.Message, state: FSMContext):
     """Функция отправки поста сейчас или отложить отправку"""
     response = message.text
     if response == 'Выслать сейчас 🚀':
-        await message.answer('💬 Высылаю...', reply_markup=kb_admin)
+        await message.answer('💬 Высылаю...', reply_markup=markup_admin)
         async with state.proxy() as data:
             post_data = data['data']
 
         caption = await get_caption_for_channel(data=post_data)
         chat_id = await bot.get_chat(MY_CHANNEL_URL)
         await bot.send_photo(chat_id=chat_id.id, photo=f'https://{post_data["poster"]}', caption=caption)
-        await message.answer(text='✅ Выслал.', reply_markup=kb_admin)
+        await message.answer(text='✅ Выслал.', reply_markup=markup_admin)
         await state.finish()
         return
 
@@ -136,7 +136,7 @@ async def now_or_later(message: types.Message, state: FSMContext):
         await message.answer(f'Произошла ошибка "{error}" введите дату и время в формате дд.мм.гггг чч:мм',
                              reply_markup=ReplyKeyboardRemove())
 
-    await message.answer(f'🕧 Пост будет опубликован {response}', reply_markup=kb_admin)
+    await message.answer(f'🕧 Пост будет опубликован {response}', reply_markup=markup_admin)
     await state.finish()
 
 

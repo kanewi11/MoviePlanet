@@ -7,7 +7,7 @@ from aiogram import types
 from .utils import get_caption_for_bot
 from .states_group import EditPostState
 from ..config import URL_DEFAULT_POSTER, SITE_URL
-from ..keyboards import kb_cancel, kb_admin
+from ..keyboards import markup_admin, markup_cancel
 from .. import session, cb, dp, logging
 from ..models import Post
 
@@ -30,7 +30,7 @@ async def callback_delete_post(call: types.CallbackQuery, callback_data: dict):
         logging.warning(traceback.format_exc())
         session.rollback()
 
-    await call.message.answer('Пост удален 🗑', reply_markup=kb_admin)
+    await call.message.answer('Пост удален 🗑', reply_markup=markup_admin)
 
 
 @dp.callback_query_handler(cb.filter(action=['edit']), state='*')
@@ -46,7 +46,8 @@ async def callback_edit_post(call: types.CallbackQuery, callback_data: dict, sta
     async with state.proxy() as data:
         data['id'] = callback_data['id']
 
-    await call.message.answer('📅 Вышлите дату и время, например:\n\n<b>01.01.2022 09:00</b>', reply_markup=kb_cancel)
+    await call.message.answer('📅 Вышлите дату и время, например:\n\n<b>01.01.2022 09:00</b>',
+                              reply_markup=markup_cancel)
     await EditPostState.DATE_TIME.set()
 
 
