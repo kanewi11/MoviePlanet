@@ -75,13 +75,15 @@ async def choice_film(call: types.CallbackQuery, callback_data: dict, state: FSM
     keyboard.add(types.InlineKeyboardButton(text=f'📺 Смотреть ({id_film + 1} из {len(films)})',
                                             url=f'{SITE_URL}/?q={films[id_film]["player"]["iframe_url"]}'))
 
+    kb_next = types.InlineKeyboardButton('Следующий ▶️', callback_data=cb.new(id=id_film, action='next'))
+    kb_previous = types.InlineKeyboardButton('◀️ Предыдущий', callback_data=cb.new(id=id_film, action='previous'))
+
     if id_film != len(films) - 1 and id_film != 0:  # Если фильм не первый и не последний
-        keyboard.add(types.InlineKeyboardButton('◀️ Предыдущий', callback_data=cb.new(id=id_film, action='previous')),
-                     types.InlineKeyboardButton('Следующий ▶️', callback_data=cb.new(id=id_film, action='next')))
+        keyboard.add(kb_previous, kb_next)
     elif id_film == 0:  # Если фильм первый
-        keyboard.add(types.InlineKeyboardButton('Следующий ▶️', callback_data=cb.new(id=id_film, action='next')))
+        keyboard.add(kb_next)
     else:  # Если последний
-        keyboard.add(types.InlineKeyboardButton('◀️ Предыдущий', callback_data=cb.new(id=id_film, action='previous')))
+        keyboard.add(kb_previous)
 
     url_photo, caption = await get_caption_for_bot(films[id_film])
     photo = types.InputMediaPhoto(media=url_photo, caption=caption)

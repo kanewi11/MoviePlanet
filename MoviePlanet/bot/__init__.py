@@ -13,7 +13,7 @@ from aiogram import Bot, types
 from .config import API_TOKEN
 
 
-logging.basicConfig(filename="logs.log", level=logging.INFO)
+logging.basicConfig(level=logging.INFO, filename='logs.log', format='%(asctime)s %(levelname)s %(message)s')
 
 engine = create_engine('sqlite:///base.db', echo=False)
 Session = sessionmaker(bind=engine)

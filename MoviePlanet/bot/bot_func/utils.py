@@ -183,7 +183,10 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
         text_msg = "По вашему запросу ничего не найдено 😕"
         not_found_message = await bot.send_message(chat_id=message.chat.id, text=text_msg)
         await set_last_message_id_in_db(user_id=message.from_user.id, message_id=not_found_message.message_id)
-        await state.finish()
+        try:
+            await state.finish()
+        except:
+            pass
         return
 
     keyboard = types.InlineKeyboardMarkup()
