@@ -159,6 +159,10 @@ async def delete_last_user_message(message: types.Message) -> None:
     last_film_message_id = user.last_message_id
     if last_film_message_id:
         await delete_msg(user_id=message.chat.id, message_id=last_film_message_id)
+        try:
+            await delete_msg(user_id=message.chat.id, message_id=last_film_message_id + 1)
+        except Exception:
+            pass
 
 
 @subscribers_only
@@ -169,7 +173,6 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
 
     if message.text.startswith('/') or message.text == 'Прекратить поиск фильма 🙅‍♂':
         await delete_msg(user_id=message.chat.id, message_id=message.message_id)
-        await delete_msg(user_id=message.chat.id, message_id=message.message_id + 1)
         await state.finish()
         return
 
