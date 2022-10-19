@@ -1,6 +1,7 @@
-# Telegram bot [MoviePlanet](https://t.me/watch_films_and_serials_bot)
-
-![LOGO](https://kingzmsk.ru/static/img/logo.png "MoviePlanet")
+<div align="center">
+    <h1>Telegram bot <a href="https://t.me/watch_films_and_serials_bot">MoviePlanet</a></h1>
+    <img width="80" src="https://raw.githubusercontent.com/kanewi11/MoviePlanet/main/redirect_site/static/img/logo.png">
+</div>
 
 ## The bot knows how:
 1. Search for movies and TV series.
