@@ -1,6 +1,8 @@
 <div align="center">
     <h1>Telegram bot <a href="https://t.me/watch_films_and_serials_bot">MoviePlanet</a></h1>
-    <img width="80" src="https://raw.githubusercontent.com/kanewi11/MoviePlanet/main/redirect_site/static/img/logo.png">
+    <a href="https://t.me/watch_films_and_serials_bot">
+        <img width="80" src="https://raw.githubusercontent.com/kanewi11/MoviePlanet/main/redirect_site/static/img/logo.png">
+    </a>
 </div>
 
 ## The bot knows how:
