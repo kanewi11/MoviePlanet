@@ -25,7 +25,7 @@ async def get_need_object_from_args(args: tuple, kwargs: dict, cls: type) -> Uni
         if isinstance(arg, cls):
             return arg
 
-    for _, value in kwargs.items():
+    for value in kwargs.values():
         if isinstance(value, cls):
             return value
 

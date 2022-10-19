@@ -54,8 +54,7 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
     post = session.query(Post).filter(Post.id == int(post_id)).first()
     if not post:
         await message.answer('Ошибка, пост не найден 😞', reply_markup=markup_admin)
-        await state.finish()
-        return
+        return await state.finish()
 
     try:
         post.date_time = date
@@ -64,8 +63,7 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
         logging.warning(traceback.format_exc())
         session.rollback()
         await message.answer(f'😫 Ошибка {error}', reply_markup=markup_admin)
-        await state.finish()
-        return
+        return await state.finish()
 
     await message.answer(f'✅ Пост будет опубликован {response}', reply_markup=markup_admin)
     await state.finish()
@@ -99,8 +97,7 @@ async def get_post(message: types.Message, state: FSMContext):
     except Exception as error:
         logging.warning(traceback.format_exc())
         await message.answer(f'Произошла ошибка "{error}",\n Попробуйте заново!', reply_markup=markup_admin)
-        await state.finish()
-        return
+        return await state.finish()
 
 
 @dp.message_handler(state=PostState.DATE_TIME)
@@ -117,8 +114,7 @@ async def now_or_later(message: types.Message, state: FSMContext):
         chat_id = await bot.get_chat(MY_CHANNEL_URL)
         await bot.send_photo(chat_id=chat_id.id, photo=f'https://{post_data["poster"]}', caption=caption)
         await message.answer(text='✅ Выслал.', reply_markup=markup_admin)
-        await state.finish()
-        return
+        return await state.finish()
 
     async with state.proxy() as data:
         post_data = data['data']

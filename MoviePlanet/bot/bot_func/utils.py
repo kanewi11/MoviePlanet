@@ -159,10 +159,7 @@ async def delete_last_user_message(message: types.Message) -> None:
     last_film_message_id = user.last_message_id
     if last_film_message_id:
         await delete_msg(user_id=message.chat.id, message_id=last_film_message_id)
-        try:
-            await delete_msg(user_id=message.chat.id, message_id=last_film_message_id + 1)
-        except Exception:
-            pass
+        await delete_msg(user_id=message.chat.id, message_id=last_film_message_id + 1)
 
 
 @subscribers_only
