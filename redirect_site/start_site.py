@@ -17,7 +17,7 @@ application = Flask(__name__)
 
 @application.errorhandler(Exception)
 def not_found(error):
-    return render_template('not_found.html', error_code=error.code)
+    return render_template('not_found.html', error_code=error.code), error.code
 
 
 @application.route('/webhook', methods=['POST', 'GET'])
@@ -40,4 +40,4 @@ def index():
 
 
 if __name__ == '__main__':
-    application.run(host='0.0.0.0')
+    application.run(host='0.0.0.0', port=5001)
