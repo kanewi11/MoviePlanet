@@ -10,7 +10,7 @@ from flask import Flask, request, render_template, jsonify
 logging.basicConfig(level=logging.INFO, filename='logs.log', format='%(asctime)s %(levelname)s %(message)s')
 
 AIOGRAM_PORT = 3001
-AIOGRAM_URL = f'http://localhost:{AIOGRAM_PORT}'
+AIOGRAM_URL = f'http://localhost:{AIOGRAM_PORT}/webhook'
 
 application = Flask(__name__)
 
