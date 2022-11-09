@@ -20,7 +20,7 @@ def not_found(error):
     return render_template('not_found.html', error_code=error.code)
 
 
-@application.route('/webhook')
+@application.route('/webhook', methods=['POST', 'GET'])
 def webhook():
     if request.content_type == 'application/json':
         try:
