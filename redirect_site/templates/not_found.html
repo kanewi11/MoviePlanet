@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="nofollow"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preload" href="{{ url_for('static',filename='styles/style.css') }}" as="style" />
+  <script src="{{ url_for('static',filename='scripts/jquery.js') }}"></script>
+  <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='styles/style.css') }}">
+  <title>MoviePlanet | 404</title>
+</head>
+<body>
+  <main>
+    <section>
+      <img src="{{ url_for('static',filename='img/logo.png') }}" alt="MoviePlanet">
+      <h1 class="error">{{ error_code }}</h1>
+      <a href="/">Вернуться на главную.</a>
+      <section>
+        <p>Страшно, очень страшно 😱, мы не знаем 🤷‍♂️, что это такое, если бы мы знали 🤓, что это такое 🤔, мы не знаем 🤷‍♂, что это такое 😔.</p>
+        <p style="color:#999999;font-size: 14px;line-height: 20px;">При своей необразованности мы можем предположить 🧐, что это диверсия какая-то!</p>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;600&display=swap');
 
 * {
     margin: 0;
@@ -6,12 +6,24 @@
     font-family: 'Open Sans', sans-serif;
 }
 
+@-webkit-keyframes bg-move {
+  0%   { background-position: -500px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes bg-move {
+  0%   { background-position: -500px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+
 body {
     height: 100vh;
     background-color: black;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: white;
 }
 
 section {
@@ -22,6 +34,7 @@ section {
 }
 
 img {
+    pointer-events: none;
     width: 100px;
     height: 100px;
     border-radius: 50%;
@@ -29,6 +42,70 @@ img {
 }
 
 h1 {
+    text-align: center;
+    font-weight: 300;
+}
+
+p {
+    font-weight: 300;
+    padding: 10px;
+    line-height: 25px;
+    max-width: 338px;
+    text-align: center;
+}
+
+a {
+    text-decoration: none;
+    color: #1c93e3;
+    transition: .3s;
+}
+
+a:hover {
     color: white;
 }
 
+a::visited {
+    color: #0098ff;
+}
+
+ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+li {
+    list-style-type: none;
+}
+
+li:nth-child(n+2) {
+    margin-left: 5px;
+}
+
+.error {
+    font-weight: 600;
+    font-size: 60px;
+}
+
+.telegram {
+    font-weight: 600;
+    margin-top: 20px;
+    text-transform: uppercase;
+    background-color: #1c93e3;
+    background-repeat: no-repeat;
+    text-decoration: none;
+    color: white;
+    padding: 12px 10px;
+    background-image: linear-gradient(270deg, rgba(100, 181, 239, 0) 48.44%, #64b5ef 75.52%, rgba(100, 181, 239, 0) 100%);
+    animation: bg-move linear 2.5s infinite;
+    width: 150px;
+    text-align: center;
+    border-radius: 100px;
+    transition: .3s;
+}
+
+.telegram:hover {
+    color: #1c93e3;
+    background-color: white;
+}
