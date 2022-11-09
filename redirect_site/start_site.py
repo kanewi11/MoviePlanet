@@ -4,8 +4,10 @@ import requests
 import traceback
 import validators
 
-from flask import Flask, request, render_template, jsonify, make_response
+from flask import Flask, request, render_template, jsonify
 
+
+logging.basicConfig(level=logging.INFO, filename='logs.log', format='%(asctime)s %(levelname)s %(message)s')
 
 AIOGRAM_PORT = 3001
 AIOGRAM_URL = f'http://localhost:{AIOGRAM_PORT}'
