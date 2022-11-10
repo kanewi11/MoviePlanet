@@ -1,26 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preload" href="{{ url_for('static',filename='styles/style.css') }}" as="style" />
-    <script src="{{ url_for('static',filename='scripts/jquery.js') }}"></script>
-    <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='styles/style.css') }}">
-    <title>MoviePlanet</title>
-</head>
-<body>
-    <main>
-        <section>
-            <img src="{{ url_for('static',filename='img/logo.png') }}" alt="MoviePlanet">
-            <h1>Все фильмы в нашем Telegram-боте 🤖</h1>
-            <a class="telegram" href="https://t.me/watch_films_and_serials_bot">Telegram</a>
-            <ul>
-                <li><a href="https://t.me/movies_from_planet">#фильмы</a></li>
-                <li><a href="https://t.me/movies_from_planet">#бесплатно</a></li>
-                <li><a href="https://t.me/movies_from_planet">#смотреть</a></li>
-                <li><a href="https://t.me/movies_from_planet">#безрегистрацииисмс</a></li>
-            </ul>
-        </section>
-    </main>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}MoviePlanet - фильмы и сериалы бесплатно.{% endblock %}
+{% block description %}Все фильмы и сериалы можно смотреть онлайн через нашего Telegram-бота совершенно бесплатно.{% endblock %}
+
+{% block body %}
+<main>
+    <section>
+        <img src="{{ url_for('static',filename='img/logo.png') }}" alt="MoviePlanet">
+        <h1>Все фильмы в нашем Telegram-боте 🤖</h1>
+        <a class="telegram" href="https://t.me/watch_films_and_serials_bot">Telegram</a>
+        <ul>
+            <li><a href="https://t.me/movies_from_planet">#фильмы</a></li>
+            <li><a href="https://t.me/movies_from_planet">#бесплатно</a></li>
+            <li><a href="https://t.me/movies_from_planet">#смотреть</a></li>
+            <li><a href="https://t.me/movies_from_planet">#безрегистрацииисмс</a></li>
+        </ul>
+    </section>
+</main>
+{% endblock %}

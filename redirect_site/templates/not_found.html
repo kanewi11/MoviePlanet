@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="preload" href="{{ url_for('static',filename='styles/style.css') }}" as="style" />
-  <script src="{{ url_for('static',filename='scripts/jquery.js') }}"></script>
-  <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='styles/style.css') }}">
-  <title>MoviePlanet | 404</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block title %}MoviePlanet | 404{% endblock %}
+{% block description %}Страшно, очень страшно, мы не знаем, что это такое, если бы мы знали, что это такое, мы не знаем, что это такое.{% endblock %}
+
+{% block body %}
   <main>
     <section>
       <img src="{{ url_for('static',filename='img/logo.png') }}" alt="MoviePlanet">
@@ -20,5 +15,4 @@
       </section>
     </section>
   </main>
-</body>
-</html>
+{% endblock %}

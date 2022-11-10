@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="robots" content="nofollow"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="preload" href="{{ url_for('static',filename='styles/style.css') }}" as="style" />
-        <script src="{{ url_for('static',filename='scripts/jquery.js') }}"></script>
-        <link rel= "stylesheet" type= "text/css" href="{{ url_for('static',filename='styles/style.css') }}">
-        <title>Редирект...</title>
-    </head>
-    <body>
+{% extends 'base.html' %}
+
+{% block title %}MoviePlanet | Редирект...{% endblock %}
+{% block description %}Все фильмы и сериалы можно смотреть онлайн через нашего Telegram-бота совершенно бесплатно.{% endblock %}
+
+{% block body %}
         <main>
             <section>
                 <img src="{{ url_for('static',filename='img/logo.png') }}" alt="MoviePlanet">
@@ -34,5 +28,4 @@
                 }
             });
         </script>
-    </body>
-</html>
+{% endblock %}
