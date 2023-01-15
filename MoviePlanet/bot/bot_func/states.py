@@ -13,7 +13,7 @@ from .states_group import ForwardState, EditPostState, PostState, ChoiceFilmStat
 from ..models import Post, User
 from ..config import MY_CHANNEL_URL
 from ..keyboards import markup_yes, markup_admin
-from .. import session, dp, bot, logging
+from .. import dp, bot, logging, Session
 
 
 @dp.message_handler(state=ForwardState.CANCEL_OR_MASSAGE, content_types=['video', 'photo', 'document', 'text'])
@@ -26,7 +26,7 @@ async def forward_msg(message: types.Message, state: FSMContext):
     :param state:
     :return:
     """
-
+    session = Session()
     users = session.query(User).all()
 
     for user in users:
@@ -36,6 +36,8 @@ async def forward_msg(message: types.Message, state: FSMContext):
             pass
         except Exception:
             logging.warning(traceback.format_exc())
+
+    session.close()
 
     await message.answer('Рассылка выполнена', reply_markup=markup_admin)
     await state.finish()
@@ -51,7 +53,9 @@ async def edit_post_date_time(message: types.Message, state: FSMContext):
         post_id = data['id']
 
     date = datetime.datetime.strptime(response.strip(), '%d.%m.%Y %H:%M')
+    session = Session()
     post = session.query(Post).filter(Post.id == int(post_id)).first()
+    session.close()
     if not post:
         await message.answer('Ошибка, пост не найден 😞', reply_markup=markup_admin)
         return await state.finish()
@@ -122,7 +126,7 @@ async def now_or_later(message: types.Message, state: FSMContext):
     post = Post(post=json.dumps(post_data),
                 date_time=datetime.datetime.strptime(response.strip(), '%d.%m.%Y %H:%M'),
                 published=False)
-
+    session = Session()
     try:
         session.add(post)
         session.commit()
@@ -131,6 +135,8 @@ async def now_or_later(message: types.Message, state: FSMContext):
         session.rollback()
         await message.answer(f'Произошла ошибка "{error}" введите дату и время в формате дд.мм.гггг чч:мм',
                              reply_markup=ReplyKeyboardRemove())
+    finally:
+        session.close()
 
     await message.answer(f'🕧 Пост будет опубликован {response}', reply_markup=markup_admin)
     await state.finish()

@@ -8,7 +8,7 @@ from ..models import Admin
 from ..config import CHANNELS_TO_SUBSCRIBE
 from ..messages import msg_if_not_subscribed
 from ..keyboards import markup_admin
-from .. import bot, session
+from .. import bot, Session
 
 
 async def get_need_object_from_args(args: tuple, kwargs: dict, cls: type) -> Union[None, object, type(None)]:
@@ -37,8 +37,9 @@ def only_admin(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
         message = await get_need_object_from_args(args, kwargs, types.Message)
-
+        session = Session()
         is_admin = session.query(Admin).filter(Admin.user_id == message.from_user.id).first()
+        session.close()
         if not is_admin:
             return
 

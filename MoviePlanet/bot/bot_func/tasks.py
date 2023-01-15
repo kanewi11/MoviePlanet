@@ -7,7 +7,7 @@ import asyncio
 
 from .utils import get_caption_for_channel
 from ..config import MY_CHANNEL_URL
-from .. import session, bot
+from .. import bot, Session
 from ..models import Post
 
 
@@ -19,6 +19,7 @@ async def send_post() -> None:
     """
 
     while True:
+        session = Session()
         posts = session.query(Post).filter(Post.date_time <= datetime.datetime.now()).all()
         
         if not posts:
@@ -37,3 +38,5 @@ async def send_post() -> None:
         except:
             logging.warning(traceback.format_exc())
             session.rollback()
+        finally:
+            session.close()

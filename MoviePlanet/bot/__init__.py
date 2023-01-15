@@ -16,7 +16,6 @@ logging.basicConfig(level=logging.INFO, filename='logs.log', format='%(asctime)s
 
 engine = create_engine('sqlite:///base.db', echo=False)
 Session = sessionmaker(bind=engine)
-session = Session()
 
 cb = CallbackData('post', 'id', 'action')
 

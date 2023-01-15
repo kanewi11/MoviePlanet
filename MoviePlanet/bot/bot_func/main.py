@@ -9,7 +9,7 @@ from .states_group import ForwardState, PostState, ChoiceFilmState
 from .utils import send_films, add_user_in_db, get_caption_for_channel, admin_keyboard
 from ..messages import msg_start, msg_help
 from ..keyboards import markup_cancel
-from .. import session, cb, dp, bot
+from .. import cb, dp, bot, Session
 from ..models import Post
 
 
@@ -43,12 +43,13 @@ async def make_post(message: types.Message):
 @dp.message_handler(text='Отложенные посты 🕜')
 async def deferred_post(message: types.Message):
     """Функция просмотра отложенных постов"""
-
+    session = Session()
     posts = session.query(Post).all()
+    session.close()
+
     if not posts:
         await message.answer('Нет отложенных постов 🫙')
         return
-
     for post in posts:
         kb_edit_delete = InlineKeyboardMarkup(row_width=2)
         kb_edit_delete.add(InlineKeyboardButton('Изменить ⏱', callback_data=cb.new(id=post.id, action="edit")),

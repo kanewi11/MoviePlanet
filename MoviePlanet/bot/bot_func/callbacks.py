@@ -8,7 +8,7 @@ from .utils import get_caption_for_bot
 from .states_group import EditPostState
 from ..config import URL_DEFAULT_POSTER, SITE_URL
 from ..keyboards import markup_admin, markup_cancel
-from .. import session, cb, dp, logging
+from .. import cb, dp, logging, Session
 from ..models import Post
 
 
@@ -21,14 +21,17 @@ async def callback_delete_post(call: types.CallbackQuery, callback_data: dict):
     :param callback_data:
     :return:
     """
+    session = Session()
     post = session.query(Post).filter(Post.id == int(callback_data['id'])).first()
-    session.delete(post)
 
     try:
+        session.delete(post)
         session.commit()
     except Exception:
         logging.warning(traceback.format_exc())
         session.rollback()
+    finally:
+        session.close()
 
     await call.message.answer('Пост удален 🗑', reply_markup=markup_admin)
 

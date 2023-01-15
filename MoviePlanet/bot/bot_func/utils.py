@@ -13,7 +13,7 @@ from .states_group import ChoiceFilmState
 from ..config import SITE_URL, URL_DEFAULT_POSTER
 from ..keyboards import markup_cancel_search, markup_admin
 from ..models import User
-from .. import bot, session, logging, cb
+from .. import bot, logging, cb, Session
 
 
 HEADERS = {
@@ -21,8 +21,21 @@ HEADERS = {
                   'Chrome/102.0.0.0 Safari/537.36 '
 }
 
-API_URL = 'https://api.movielab.pro/api/v2/'
-METHOD_SEARCH = 'search'
+API_URL = 'https://api.movielab.pro/api/v3/'
+ENDPOINT_SEARCH = 'search'
+ENDPOINT_RANDOM = 'random'
+
+
+async def add_session(obj: object):
+    session = Session()
+    try:
+        session.add(obj)
+        session.commit()
+    except Exception:
+        logging.warning(traceback.format_exc())
+        session.rollback()
+    finally:
+        session.close()
 
 
 async def find_film(film_name: str) -> Union[list, None]:
@@ -41,7 +54,7 @@ async def find_film(film_name: str) -> Union[list, None]:
 
     films = []
 
-    response = requests.post(API_URL + METHOD_SEARCH, headers=HEADERS, json=data)
+    response = requests.post(API_URL + ENDPOINT_SEARCH, headers=HEADERS, json=data)
     if response.status_code != 200:
         return None
 
@@ -54,11 +67,22 @@ async def find_film(film_name: str) -> Union[list, None]:
 
     for page in range(1, pages + 1):
         data['page'] = page
-        json_response = requests.post(API_URL + METHOD_SEARCH, headers=HEADERS, json=data).json()
+        json_response = requests.post(API_URL + ENDPOINT_SEARCH, headers=HEADERS, json=data).json()
         films += json_response['results']
 
     del json_response
     return films
+
+
+async def get_random_films() -> Union[list, None]:
+    """Рандомные фильмы"""
+    response = requests.post(API_URL + ENDPOINT_RANDOM, headers=HEADERS)
+    if response.status_code != 200:
+        return None
+
+    json_response = response.json()
+
+    return json_response['results']
 
 
 async def add_user_in_db(user_id: Union[str, int]) -> None:
@@ -68,17 +92,15 @@ async def add_user_in_db(user_id: Union[str, int]) -> None:
     :param user_id:
     :return:
     """
+    session = Session()
     is_new_user = session.query(User).filter(User.user_id == str(user_id)).first()
     if is_new_user:
         return
 
+    session.close()
+
     user = User(str(user_id))
-    try:
-        session.add(user)
-        session.commit()
-    except Exception:
-        logging.warning(traceback.format_exc())
-        session.rollback()
+    await add_session(user)
 
 
 async def get_data_about_film(url: str) -> Union[dict, None]:
@@ -144,6 +166,7 @@ async def get_caption_for_bot(film_data: dict) -> (str, str):
 
 async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[str, int]) -> None:
     """Записываем в бд id последнего сообщения пользователя, чтобы его потом удалить"""
+    session = Session()
     user = session.query(User).filter(User.user_id == user_id).first()
     try:
         user.last_message_id = int(message_id)
@@ -151,15 +174,25 @@ async def set_last_message_id_in_db(user_id: Union[str, int], message_id: Union[
     except Exception:
         logging.warning(traceback.format_exc())
         session.rollback()
+    finally:
+        session.close()
 
 
 async def delete_last_user_message(message: types.Message) -> None:
     """Удаление последнего поиска пользователя"""
+    session = Session()
     user = session.query(User).filter(User.user_id == message.from_user.id).first()
-    last_film_message_id = user.last_message_id
-    if last_film_message_id:
-        await delete_msg(user_id=message.chat.id, message_id=last_film_message_id)
-        await delete_msg(user_id=message.chat.id, message_id=last_film_message_id + 1)
+    try:
+        last_film_message_id = user.last_message_id
+    except Exception:
+        logging.warning(traceback.format_exc())
+        session.rollback()
+    else:
+        if last_film_message_id:
+            await delete_msg(user_id=message.chat.id, message_id=last_film_message_id)
+            await delete_msg(user_id=message.chat.id, message_id=last_film_message_id + 1)
+    finally:
+        session.close()
 
 
 @subscribers_only
