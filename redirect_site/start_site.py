@@ -34,9 +34,11 @@ def webhook():
 @application.route('/')
 def index():
     q = request.args.get('q')
+    film_name = request.args.get('film_name') or 'Фильм...'
+
     if not q or not validators.url(q):
         return render_template('hello.html')
-    return render_template('index.html', q=q)
+    return render_template('index.html', q=q, film_name=film_name)
 
 
 if __name__ == '__main__':

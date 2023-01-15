@@ -224,10 +224,10 @@ async def send_films(message: types.Message, state: FSMContext) -> None:
 
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text=f'📺 Смотреть (1 из {len(films)})',
-                                            url=f'{SITE_URL}/?q={films[0]["player"]["iframe_url"]}'))
+                                            url=f'{SITE_URL}/?q={films[0]["player"]["iframe_url"]}'
+                                                f'&film_name={films[0]["title_ru"]}'))
     if len(films) > 1:  # Если фильмов больше чем 1, то добавляем пагинацию и записываем фильмы в машину состояний
         keyboard.add(types.InlineKeyboardButton('Следующий ▶️', callback_data=cb.new(id=0, action='next')))
-
         async with state.proxy() as data:
             data['films'] = films
         await ChoiceFilmState.FILM_CHOICE.set()

@@ -76,7 +76,8 @@ async def choice_film(call: types.CallbackQuery, callback_data: dict, state: FSM
 
     keyboard = types.InlineKeyboardMarkup()
     keyboard.add(types.InlineKeyboardButton(text=f'📺 Смотреть ({id_film + 1} из {len(films)})',
-                                            url=f'{SITE_URL}/?q={films[id_film]["player"]["iframe_url"]}'))
+                                            url=f'{SITE_URL}/?q={films[id_film]["player"]["iframe_url"]}'
+                                                f'&film_name={films[0]["title_ru"]}'))
 
     kb_next = types.InlineKeyboardButton('Следующий ▶️', callback_data=cb.new(id=id_film, action='next'))
     kb_previous = types.InlineKeyboardButton('◀️ Предыдущий', callback_data=cb.new(id=id_film, action='previous'))
