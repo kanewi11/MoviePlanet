@@ -5,6 +5,8 @@
     </a>
 </div>
 
+The database is synchronous, if anyone needs to convert to asynchronous, it takes 5 minutes. I am lazy and forgot about it at all :)
+
 ## The bot knows how:
 1. Search for movies and TV series.
 2. Make posts automatically, the input link to the movie or series.
